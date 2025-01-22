@@ -1,17 +1,16 @@
 .navbar {
-      display: flex;
+      height: 5.5rem;
       justify-content: space-between;
       align-items: center;
       background-color: #333;
-      color: #fff;
+      color: #221e1e;
       padding: 1rem;
+      background-color: beige;
+
     }
-    
-    .navbar-left .logo {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #fff;
-      text-decoration: none;
+    .navbar-brand{
+      text-align: center;
+      
     }
     
     .navbar-center .nav-links {
@@ -26,7 +25,6 @@
     }
     
     .navbar-center .nav-links a {
-      color: #fff;
       text-decoration: none;
     }
     
@@ -52,4 +50,18 @@
       position: absolute;
       top: -0.5rem;
       right: -0.5rem;
+    }
+    .dropdown {
+      margin-bottom: 1rem;
+     background-color: #333;
+     text: #383434;
+
+    }
+
+    .navbar-logo {
+      display: block;
+      margin-top: 1px;
+      height: 4.5rem; 
+      border-radius: 70%;
+      object-fit: cover;
     }

@@ -1,0 +1,38 @@
+.search-container {
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  align-items: center;
+  margin-top: 3rem;
+  background-image: url('../src/assets/food.png');
+}
+
+.search-input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 300px;
+  margin-bottom: 10px;
+}
+
+.search-button {
+  height: 2rem;
+  padding: 1.2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 15px;
+  background-color: black;
+  color: rgb(255, 255, 255);
+ 
+}
+
+.search-button:hover {
+  background-color: #55a9d6;
+
+}
+
+.search-input-container {
+  margin-top: 10rem;
+}
+
