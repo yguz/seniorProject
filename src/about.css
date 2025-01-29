@@ -1,0 +1,28 @@
+.about-us {
+      padding: 20px;
+      background-color: #f9fafb;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      margin: 20px auto;
+  }
+  
+  .about-us-title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+  }
+  
+  .about-us-text {
+      font-size: 1.125rem;
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 15px;
+  }
+  
+  .about-us-text em {
+      font-style: italic;
+  }
+  
