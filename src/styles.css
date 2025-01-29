@@ -1,0 +1,176 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+}
+
+#priceFilter {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 1em;
+    border: 2px solid #3498db;
+    border-radius: 25px;
+    background-color: white;
+    cursor: pointer;
+    outline: none;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.recipe-box {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.6s ease;
+    position: relative;
+    min-height: 400px;
+    transform-style: preserve-3d;
+}
+
+.recipe-box:hover {
+    transform: rotateY(180deg);
+}
+
+.front, .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+.front {
+    transform: rotateY(0deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.back {
+    transform: rotateY(180deg);
+    background: white;
+    overflow-y: auto;
+}
+
+/* Keep the rest of the styles the same as previous version */
+.front img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.front h3 {
+    color: #e74c3c;
+    margin-bottom: 10px;
+    font-size: 1.5em;
+}
+
+.front p {
+    color: #27ae60;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.back h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.4em;
+}
+
+.back p {
+    color: #34495e;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.back br {
+    display: block;
+    content: "";
+    margin: 8px 0;
+}
+
+.comment-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.comment-btn:hover {
+    background-color: #2980b9;
+}
+
+.comment-box {
+    display: none;
+    margin-top: 15px;
+}
+
+.comment-box.active {
+    display: block;
+}
+
+.comment-box textarea {
+    width: 100%;
+    height: 80px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    resize: vertical;
+    margin-bottom: 10px;
+}
+
+.submit-comment {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-comment:hover {
+    background-color: #219a52;
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+    
+    .recipe-box {
+        min-height: 350px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+}
