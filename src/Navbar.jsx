@@ -12,6 +12,7 @@ import Register from './Register';
 
 
 
+
 const Navbar = () => {
   return (
     <BrowserRouter>
@@ -80,9 +81,9 @@ const Navbar = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-      <Route path="/breakfast" element={<iframe src="/breakfast.html" title="Breakfast" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
-      <Route path="/lunch" element={<iframe src="/lunch.html" title="lunch" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
-      <Route path="/dinner" element={<iframe src="/dinner.html" title="dinner" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
+      <Route path="/breakfast" element={<iframe src="/breakfast.html" title="breakfast" />} />
+      <Route path="/lunch" element={<iframe src="/lunch.html" title="lunch" />} />
+      <Route path="/dinner" element={<iframe src="/dinner.html" title="dinner" />} />
       </Routes>
     </BrowserRouter>
   );
