@@ -80,10 +80,7 @@ const Navbar = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        {/* I need to work on this/}
-        {/* <Route path="/breakfast" element={<div>Breakfast Recipes</div>} />
-        <Route path="/lunch" element={<div>Lunch Recipes</div>} />
-        <Route path="/dinner" element={<div>Dinner Recipes</div>} /> */}
+      <Route path="/breakfast" element={<iframe src="/breakfast.html" title="Breakfast" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
       </Routes>
     </BrowserRouter>
   );
