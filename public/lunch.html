@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunch Recipes</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+<h1>Lunch</h1>
+<select id="priceFilter" onchange="filterByPrice()">
+    <option value="">Price Filter</option>
+    <option value="lowToHigh">Low to High</option>
+    <option value="highToLow">High to Low</option>
+</select>
+
+<div class="container">
+    <div class="recipe-box">
+        <div class="front">
+            <img src="https://assets.onecompiler.app/43757a92k/437575bgx/Turkey-Sandwich-4.jpg" alt="Pancakes">
+            <h3>Turkey Sandwich</h3>
+            <p>$7.99</p>
+        </div>
+        <div class="back">
+            <h3>Turkey Sandwich</h3>
+            <p><br>Ingredients:</br> <br>2 slices (1/2 inch thick) hearty country bread</br>
+            <br>4 slices roasted turkey breast</br>
+            <br>1 slice pepperjack cheese</br>
+            <br>2 teaspoons butter</br>
+            <br>4 teaspoons strawberry preserves</br></p>
+            <p><br>Recipe:</br> 
+            <br>Heat skillet over medium heat.<br/>
+            <br>Butter one side of each bread slice.<br/>
+            <br>Place one slice in skillet.<br/>
+            <br>Top with turkey and cheese.<br/>
+            <br>Place second slice on top, butter side up.<br/>
+            <br>Cook until golden brown, 3-5 minutes.<br/></p>
+            <button class="comment-btn">Add Comment</button>
+            <div class="comment-box">
+                <textarea placeholder="Enter your comment here..."></textarea>
+                <button class="submit-comment">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="recipe-box">
+        <div class="front">
+            <img src="https://assets.onecompiler.app/43757a92k/437575bgx/Egg-Salad-5.jpg" alt="Omelette">
+            <h3>Simple Egg Salad</h3>
+            <p>$6.99</p>
+        </div>
+        <div class="back">
+            <h3>Simple Egg Salad</h3>
+            <p><br>Ingredients:</br> <br>6 hard-cooked eggs, chopped</br>
+            <br>¼ cup chopped cucumber</br>
+            <br>3 tablespoons ranch dressing</br>
+            <br>1 tablespoon mustard</br>
+            <br>salt and ground black pepper to taste</br><br></br>
+            <br>Recipe:</br>
+            <br>1. Beat eggs</br>
+            <br>2. Add ingredients</br>
+            <br>3. Cook in a pan</br></p>
+            <button class="comment-btn">Add Comment</button>
+            <div class="comment-box">
+                <textarea placeholder="Enter your comment here..."></textarea>
+                <button class="submit-comment">Submit</button>
+            </div>
+        </div>
+    </div>
+  
+  <div class="recipe-box">
+    <div class="front">
+        <img src="https://assets.onecompiler.app/43757a92k/437575bgx/Best-Caprese-Salad-Recipe.jpg" alt="Caprese Salad">
+        <h3>Caprese Salad</h3>
+        <p>$8.99</p>
+    </div>
+    <div class="back">
+        <h3>Caprese Salad</h3>
+        <p><br>Ingredients:</br>
+        <br>4 large ripe tomatoes, sliced</br>
+        <br>1 fresh mozzarella cheese, sliced</br>
+        <br>Fresh basil leaves</br>
+        <br>2 tablespoons extra virgin olive oil</br>
+        <br>1 tablespoon balsamic vinegar</br>
+        <br>Salt and pepper to taste</br></p>
+        <p><br>Recipe:</br>
+        <br>1. Arrange tomato and mozzarella slices on a plate, alternating them.</br>
+        <br>2. Tuck fresh basil leaves between the slices.</br>
+        <br>3. Drizzle with olive oil and balsamic vinegar.</br>
+        <br>4. Season with salt and pepper.</br>
+        <br>5. Serve immediately.</br></p>
+        <button class="comment-btn">Add Comment</button>
+        <div class="comment-box">
+            <textarea placeholder="Enter your comment here..."></textarea>
+            <button class="submit-comment">Submit</button>
+        </div>
+    </div>
+</div>
+
+<div class="recipe-box">
+    <div class="front">
+        <img src="https://assets.onecompiler.app/43757a92k/437575bgx/Blog-Chicken-Caesar-Salad-3-scaled.webp" alt="Chicken Caesar Wrap">
+        <h3>Chicken Caesar Wrap</h3>
+        <p>$9.49</p>
+    </div>
+    <div class="back">
+        <h3>Chicken Caesar Wrap</h3>
+        <p><br>Ingredients:</br>
+        <br>1 large flour tortilla</br>
+        <br>1 cup cooked chicken, shredded</br>
+        <br>1 cup romaine lettuce, chopped</br>
+        <br>1/4 cup grated Parmesan cheese</br>
+        <br>2 tablespoons Caesar dressing</br>
+        <br>1/4 cup croutons</br></p>
+        <p><br>Recipe:</br>
+        <br>1. Lay the tortilla flat and spread Caesar dressing evenly.</br>
+        <br>2. Layer chicken, lettuce, Parmesan cheese, and croutons in the center.</br>
+        <br>3. Fold the sides of the tortilla inward and roll tightly.</br>
+        <br>4. Slice in half and serve.</br></p>
+        <button class="comment-btn">Add Comment</button>
+        <div class="comment-box">
+            <textarea placeholder="Enter your comment here..."></textarea>
+            <button class="submit-comment">Submit</button>
+        </div>
+    </div>
+</div>
+
+<div class="recipe-box">
+    <div class="front">
+        <img src="https://assets.onecompiler.app/43757a92k/437575bgx/Stir-Fry-Veggies-17-1024x1024.jpg" alt="Vegetable Stir-Fry">
+        <h3>Vegetable Stir-Fry</h3>
+        <p>$7.99</p>
+    </div>
+    <div class="back">
+        <h3>Vegetable Stir-Fry</h3>
+        <p><br>Ingredients:</br>
+        <br>2 cups broccoli florets</br>
+        <br>1 red bell pepper, sliced</br>
+        <br>1 yellow bell pepper, sliced</br>
+        <br>1 cup snap peas</br>
+        <br>1 carrot, thinly sliced</br>
+        <br>2 tablespoons soy sauce</br>
+        <br>1 tablespoon sesame oil</br>
+        <br>1 clove garlic, minced</br></p>
+        <p><br>Recipe:</br>
+        <br>1. Heat sesame oil in a large skillet or wok over medium-high heat.</br>
+        <br>2. Add garlic and sauté for 30 seconds.</br>
+        <br>3. Add broccoli, bell peppers, snap peas, and carrots. Stir-fry for 5-7 minutes.</br>
+        <br>4. Pour in soy sauce and toss to coat.</br>
+        <br>5. Serve hot with rice or noodles.</br></p>
+        <button class="comment-btn">Add Comment</button>
+        <div class="comment-box">
+            <textarea placeholder="Enter your comment here..."></textarea>
+            <button class="submit-comment">Submit</button>
+        </div>
+    </div>
+</div>
+
+<div class="recipe-box">
+    <div class="front">
+        <img src="https://assets.onecompiler.app/43757a92k/437575bgx/Ground-Beef-Tacos-11-crop-scaled.jpg" alt="Beef Tacos">
+        <h3>Beef Tacos</h3>
+        <p>$8.99</p>
+    </div>
+    <div class="back">
+        <h3>Beef Tacos</h3>
+        <p><br>Ingredients:</br>
+        <br>1 lb ground beef</br>
+        <br>1 packet taco seasoning</br>
+        <br>8 small taco shells</br>
+        <br>1 cup shredded lettuce</br>
+        <br>1 cup diced tomatoes</br>
+        <br>1/2 cup shredded cheddar cheese</br>
+        <br>1/4 cup sour cream</br></p>
+        <p><br>Recipe:</br>
+        <br>1. Cook ground beef in a skillet over medium heat until browned.</br>
+        <br>2. Add taco seasoning and water as per packet instructions. Simmer for 5 minutes.</br>
+        <br>3. Warm taco shells in the oven or microwave.</br>
+        <br>4. Fill each shell with beef, lettuce, tomatoes, cheese, and a dollop of sour cream.</br>
+        <br>5. Serve immediately.</br></p>
+        <button class="comment-btn">Add Comment</button>
+        <div class="comment-box">
+            <textarea placeholder="Enter your comment here..."></textarea>
+            <button class="submit-comment">Submit</button>
+        </div>
+    </div>
+</div>
+
+<div class="recipe-box">
+    <div class="front">
+        <img src="https://assets.onecompiler.app/43757a92k/437575bgx/vegan-pasta-primavera-23-sq.webp" alt="Pasta Primavera">
+        <h3>Pasta Primavera</h3>
+        <p>$10.99</p>
+    </div>
+    <div class="back">
+        <h3>Pasta Primavera</h3>
+        <p><br>Ingredients:</br>
+        <br>8 oz pasta (penne or fusilli)</br>
+        <br>1 cup broccoli florets</br>
+        <br>1 cup sliced zucchini</br>
+        <br>1 cup cherry tomatoes, halved</br>
+        <br>1/2 cup grated Parmesan cheese</br>
+        <br>2 tablespoons olive oil</br>
+        <br>2 cloves garlic, minced</br>
+        <br>Salt and pepper to taste</br></p>
+        <p><br>Recipe:</br>
+        <br>1. Cook pasta according to package instructions. Drain and set aside.</br>
+        <br>2. In a large skillet, heat olive oil over medium heat. Add garlic and sauté for 1 minute.</br>
+        <br>3. Add broccoli, zucchini, and cherry tomatoes. Cook for 5-7 minutes until tender.</br>
+        <br>4. Toss the cooked pasta with the vegetables.</br>
+        <br>5. Sprinkle with Parmesan cheese, salt, and pepper. Serve warm.</br></p>
+        <button class="comment-btn">Add Comment</button>
+        <div class="comment-box">
+            <textarea placeholder="Enter your comment here..."></textarea>
+            <button class="submit-comment">Submit</button>
+        </div>
+    </div>
+</div>
+
+<div class="recipe-box">
+    <div class="front">
+        <img src="https://assets.onecompiler.app/43757a92k/437575bgx/739C7136-CBA2-4DDC-8D56-ECA409F69AB9-3.jpeg" alt="Greek Salad">
+        <h3>Greek Salad</h3>
+        <p>$7.49</p>
+    </div>
+    <div class="back">
+        <h3>Greek Salad</h3>
+        <p><br>Ingredients:</br>
+        <br>2 cups chopped romaine lettuce</br>
+        <br>1 cup cherry tomatoes, halved</br>
+        <br>1 cucumber, sliced</br>
+        <br>1/2 red onion, thinly sliced</br>
+        <br>1/2 cup Kalamata olives</br>
+        <br>1/2 cup feta cheese, crumbled</br>
+        <br>2 tablespoons olive oil</br>
+        <br>1 tablespoon red wine vinegar</br>
+        <br>1 teaspoon dried oregano</br></p>
+        <p><br>Recipe:</br>
+        <br>1. In a large bowl, combine lettuce, tomatoes, cucumber, red onion, and olives.</br>
+        <br>2. Sprinkle feta cheese on top.</br>
+        <br>3. Drizzle with olive oil and red wine vinegar.</br>
+        <br>4. Sprinkle with oregano and toss gently.</br>
+        <br>5. Serve immediately.</br></p>
+        <button class="comment-btn">Add Comment</button>
+        <div class="comment-box">
+            <textarea placeholder="Enter your comment here..."></textarea>
+            <button class="submit-comment">Submit</button>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
