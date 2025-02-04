@@ -7,6 +7,8 @@ import'/src/assets/contact.css';
 import '/src/login.jsx';
 import Register from "./Register";
 import './Search.css';
+import myLogo from './assets/logo2.png'; 
+
 
 
 
@@ -19,3 +21,4 @@ function App() {
 }
 
 export default App;
+
