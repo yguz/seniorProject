@@ -23,7 +23,7 @@ router.post('/register', async (req, res) => {
     // Create the user
     const user = await User.create({
       name,
-      email, // This will be encrypted in the model hook
+      email, 
       password: hashedPassword,
       dietaryPreferences,
     });

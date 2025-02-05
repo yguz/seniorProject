@@ -7,7 +7,7 @@ const API_KEY = process.env.SPOONACULAR_API_KEY;
 const SPOONACULAR_URL = 'https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/findByIngredients';
 const SPOONACULAR_HOST = 'spoonacular-recipe-food-nutrition-v1.p.rapidapi.com';
 
-// GET /api/recipes/search?ingredients=chicken,tomato
+// GET /api/recipes/search?ingredients=chicken,tomato,garlic
 router.get('/search', async (req, res) => {
   try {
     let { ingredients } = req.query;
@@ -19,22 +19,28 @@ router.get('/search', async (req, res) => {
     ingredients = ingredients.replace(/\s+/g, '');
 
     const response = await axios.get(SPOONACULAR_URL, {
-      params: { ingredients, number: 5 },
+      params: { ingredients, number: 10 }, // Fetch up to 10 results
       headers: {
         'X-RapidAPI-Key': API_KEY,
         'X-RapidAPI-Host': SPOONACULAR_HOST,
       },
     });
 
-    if (response.status === 401) {
-      return res.status(401).json({ error: 'Invalid API key. Check your .env file.' });
-    }
-
     if (!response.data || response.data.length === 0) {
       return res.status(404).json({ error: 'No recipes found for the given ingredients' });
     }
 
-    res.json(response.data);
+    // Format the response for frontend display
+    const formattedRecipes = response.data.map(recipe => ({
+      id: recipe.id,
+      title: recipe.title,
+      image: recipe.image,
+      usedIngredientCount: recipe.usedIngredientCount,
+      missedIngredientCount: recipe.missedIngredientCount,
+      ingredients: [...recipe.usedIngredients.map(i => i.name), ...recipe.missedIngredients.map(i => i.name)]
+    }));
+
+    res.json(formattedRecipes);
   } catch (error) {
     console.error('Error fetching recipes:', error);
 

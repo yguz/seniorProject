@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database'); // Fixed import
+const { sequelize } = require('../config/database'); 
 const { encryptEmail, decryptEmail } = require('../utils/encryption');
 
 const User = sequelize.define('User', {

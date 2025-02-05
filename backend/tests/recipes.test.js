@@ -17,7 +17,7 @@ describe('GET /api/recipes/search', () => {
   });
 });
 
-// ✅ Close DB connection & server after all tests
+// Close DB connection & server after all tests
 afterAll(async () => {
   await sequelize.close();
   if (app.server) app.server.close();

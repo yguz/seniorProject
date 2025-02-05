@@ -24,7 +24,6 @@ app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../dist/index.html'));
 });
 
-
 // Database Connection
 sequelize
   .authenticate()
