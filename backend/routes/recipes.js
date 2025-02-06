@@ -4,10 +4,9 @@ require('dotenv').config();
 
 const router = express.Router();
 const API_KEY = process.env.SPOONACULAR_API_KEY;
-const SPOONACULAR_URL = 'https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/findByIngredients';
-const SPOONACULAR_HOST = 'spoonacular-recipe-food-nutrition-v1.p.rapidapi.com';
 
-// GET /api/recipes/search?ingredients=chicken,tomato,garlic
+const SPOONACULAR_URL = 'https://api.spoonacular.com/recipes/findByIngredients?apiKey=' + API_KEY;
+
 router.get('/search', async (req, res) => {
   try {
     let { ingredients } = req.query;
@@ -15,15 +14,12 @@ router.get('/search', async (req, res) => {
       return res.status(400).json({ error: 'Please provide ingredients' });
     }
 
-    // Remove spaces from ingredients to ensure proper API formatting
+    // Remove any extra spaces to ensure proper API formatting
     ingredients = ingredients.replace(/\s+/g, '');
 
+    // Request parameters: ingredients and number (to limit the number of recipes returned)
     const response = await axios.get(SPOONACULAR_URL, {
-      params: { ingredients, number: 10 }, // Fetch up to 10 results
-      headers: {
-        'X-RapidAPI-Key': API_KEY,
-        'X-RapidAPI-Host': SPOONACULAR_HOST,
-      },
+      params: { ingredients, number: 10 } // Adjust number as needed
     });
 
     if (!response.data || response.data.length === 0) {
