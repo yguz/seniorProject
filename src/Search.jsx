@@ -15,7 +15,7 @@ const Search = () => {
 
   return (
     <div className="search-container">
-      <h1>Find meal ideas on a budget.</h1>
+      <h1 className="typing-effect">Find meal ideas on a budget.</h1>
       <div className="search-card">
         <div className="search-input-container">
           <input
