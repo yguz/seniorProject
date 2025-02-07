@@ -1,19 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './assets/recipeCard.css';
 
 const RecipeCard = ({ recipe }) => {
   const [showCommentBox, setShowCommentBox] = useState(false);
+  const [price, setPrice] = useState(null); // State to store the price
 
   const toggleCommentBox = () => {
     setShowCommentBox(!showCommentBox);
   };
 
-  // generate a random price
+  
+  /**
+   * Generate a random price (later on will be replaced with a price computed from using an API like chat gpt)
+   * using the ingredients rendered here
+   * */
   const generateRandomPrice = () => {
     return (Math.random() * (20 - 5) + 5).toFixed(2); // Random price between 5 and 20
   };
 
-  const price = generateRandomPrice();
+  // Set the price only once when the recipe is first loaded
+  useEffect(() => {
+    setPrice(generateRandomPrice());
+  }, [recipe]); // change price when `recipe` data changes
 
   return (
     <div className="recipe-box">
