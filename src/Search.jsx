@@ -1,24 +1,15 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Search.css';
 
 const Search = () => {
   const [query, setQuery] = useState('');
-  const [recipes, setRecipes] = useState([]);
-  const [error, setError] = useState(null);
+  const navigate = useNavigate();  // navigate to the results page
 
-  const fetchRecipes = async () => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/recipes/search?ingredients=${query}`);
-      
-      if (!response.ok) {
-        throw new Error(`Server Error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setRecipes(data);
-      setError(null);
-    } catch (err) {
-      setError(err.message);
+  const handleSearch = () => {
+    if (query) {
+      // go to the results page with the query as a URL parameter
+      navigate(`/results?search=${query}`);
     }
   };
 
@@ -34,17 +25,9 @@ const Search = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <button className="search-btn" onClick={fetchRecipes}>Search</button>
+          <button className="search-btn" onClick={handleSearch}>Search</button>
         </div>
       </div>
-      {error && <p className="error">Error: {error}</p>}
-      {recipes.length > 0 && (
-        <ul>
-          {recipes.map(recipe => (
-            <li key={recipe.id}>{recipe.title}</li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 };

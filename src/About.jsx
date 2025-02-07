@@ -26,13 +26,7 @@ const AboutUs = () => {
       image: "https://ichef.bbci.co.uk/images/ic/1200x675/p0hfwjv1.jpg",
       price: "Information Technology (IT)"
     },
-    {
-      id: 4,
-      name: "Ben Abraham",
-      role: "Back-end Designer",
-      image: "https://img.freepik.com/premium-photo/smiling-chef-cartoon-character-holding-tasty-dish_883103-711.jpg?w=2000",
-      price: "Information Technology (IT)"
-    },
+    
   ];
 
   const handleCardClick = (id) => {
