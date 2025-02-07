@@ -38,7 +38,7 @@
       font-size: 1.2em;
     }
 
-    .search-input {
+    .search-input-results {
       width: 80%;
       padding: 15px;
       font-size: 18px;
@@ -50,20 +50,20 @@
       transition: all 0.3s ease; 
     }
     
-    .search-input:focus {
+    .search-input-results:focus {
       border-color: #3498db;
       outline: none;
       box-shadow: 0 0 8px rgba(52, 152, 219, 0.4); 
       background-color: #ffffff; 
     }
     
-    .search-input::placeholder {
+    .search-input-results::placeholder {
       color: #aaa;
       font-style: italic;
     }    
     
     
-    .search-btn {
+    .search-btn-results {
       width: 10%;
       padding: 15px 30px;
       background-color: #f44336;
@@ -75,6 +75,6 @@
       transition: background-color 0.3s;
     }
     
-    .search-btn:hover {
+    .search-btn-results:hover {
       background-color: #d32f2f;
     }

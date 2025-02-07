@@ -47,12 +47,12 @@ const SearchResults = () => {
       <div className="search-again-container">
         <input
           type="text"
-          className="search-input"
+          className="search-input-results"
           placeholder="Search for more recipes..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <button className="search-btn" onClick={handleSearch}>Search</button>
+        <button className="search-btn-results" onClick={handleSearch}>Search</button>
       </div>
 
       {error && <p className="error">Error: {error}</p>}
