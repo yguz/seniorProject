@@ -9,13 +9,15 @@ import Home from './Home';
 import Contact from './Contact';
 import Login from './Login';
 import Register from './Register';
-import SearchResults from './SearchResults';
+
+
+
 
 const Navbar = () => {
   return (
     <BrowserRouter>
-      <nav className="navbar navbar-expand-lg navbar-light bg-beige">
-        <div className="container-fluid">
+      <nav className="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div className="container">
           <Link to="/" className="navbar-brand">
             <img src="src/assets/logo2.png" alt="Logo" className="navbar-logo" />
           </Link>
@@ -35,8 +37,13 @@ const Navbar = () => {
                   Home
                 </Link>
               </li>
-              <li className="nav-item">
-                <DropdownButton id="dropdown" title="Meals" className="nav-link">
+              <li className="nav-item dropdown">
+                <DropdownButton
+                  id="dropdown"
+                  title="Meals"
+                  className="nav-link"
+                  menuVariant="dark"
+                >
                   <Dropdown.Item as={Link} to="/breakfast">
                     Breakfast
                   </Dropdown.Item>
@@ -79,10 +86,9 @@ const Navbar = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/breakfast" element={<iframe src="/breakfast.html" title="breakfast" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
-        <Route path="/lunch" element={<iframe src="/lunch.html" title="lunch" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
-        <Route path="/dinner" element={<iframe src="/dinner.html" title="dinner" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
-        <Route path="/results" element={<SearchResults />} /> {/* Add results route */}
+      <Route path="/breakfast" element={<iframe src="/breakfast.html" title="breakfast" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
+      <Route path="/lunch" element={<iframe src="/lunch.html" title="lunch" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
+      <Route path="/dinner" element={<iframe src="/dinner.html" title="dinner" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
       </Routes>
     </BrowserRouter>
   );
