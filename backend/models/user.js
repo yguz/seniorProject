@@ -14,7 +14,7 @@ User.beforeCreate(async (user) => {
   const bcrypt = require('bcryptjs');
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
-  user.email = encryptEmail(user.email);
+  user.email = encryptEmail(user.email); 
 });
 
 // Decrypt email after retrieving
