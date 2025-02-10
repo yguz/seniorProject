@@ -4,46 +4,9 @@ require('dotenv').config();
 
 const router = express.Router();
 const API_KEY = process.env.SPOONACULAR_API_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const SPOONACULAR_URL = 'https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/findByIngredients';
 const SPOONACULAR_HOST = 'spoonacular-recipe-food-nutrition-v1.p.rapidapi.com';
 
-// Function to calculate approximate price using Gemini AI
-const getAIPriceEstimate = async (ingredients) => {
-  try {
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        contents: [
-          {
-            parts: [
-              {
-                text: `Estimate the total cost in USD for a recipe with the following ingredients based on average US grocery prices. 
-                Provide only a number with two decimal places (e.g., 5.99). 
-
-                Ingredients: ${ingredients.join(', ')}`
-              }
-            ]
-          }
-        ]
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    const priceEstimate = response.data.contents[0]?.parts[0]?.text.trim();
-    console.log('Gemini Response:', priceEstimate); // Debugging: Log Gemini's response
-    return parseFloat(priceEstimate) || 0; // Convert to a number
-  } catch (error) {
-    console.error('Gemini AI price estimation failed:', error.response?.data || error.message);
-    return 0; // Default price if AI call fails
-  }
-};
-
-// GET /api/recipes/search?ingredients=chicken,tomato,garlic
 router.get('/search', async (req, res) => {
   try {
     let { ingredients } = req.query;
@@ -51,15 +14,12 @@ router.get('/search', async (req, res) => {
       return res.status(400).json({ error: 'Please provide ingredients' });
     }
 
-    // Remove spaces from ingredients to ensure proper API formatting
+    // Remove any extra spaces to ensure proper API formatting
     ingredients = ingredients.replace(/\s+/g, '');
 
+    // Request parameters: ingredients and number (to limit the number of recipes returned)
     const response = await axios.get(SPOONACULAR_URL, {
-      params: { ingredients, number: 10 }, // Fetch up to 10 results
-      headers: {
-        'X-RapidAPI-Key': API_KEY,
-        'X-RapidAPI-Host': SPOONACULAR_HOST,
-      },
+      params: { ingredients, number: 10 } // Adjust number as needed
     });
 
     if (!response.data || response.data.length === 0) {

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Search.css';
 
 const Search = () => {
@@ -6,6 +7,7 @@ const Search = () => {
   const [recipes, setRecipes] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();  // Navigate to the results page
 
   const fetchRecipes = async () => {
     if (!query.trim()) {
@@ -24,6 +26,7 @@ const Search = () => {
 
       const data = await response.json();
       setRecipes(data);
+      navigate(`/results?search=${query}`); // Navigate to results page with query
     } catch (err) {
       setError(err.message);
     } finally {
@@ -33,7 +36,7 @@ const Search = () => {
 
   return (
     <div className="search-container">
-      <h1>Find meal ideas on a budget.</h1>
+      <h1 className="typing-effect">Find meal ideas on a budget.</h1>
       <div className="search-card">
         <div className="search-input-container">
           <input

@@ -16,8 +16,8 @@ import Register from './Register';
 const Navbar = () => {
   return (
     <BrowserRouter>
-      <nav className="navbar navbar-expand-lg navbar-light bg-beige">
-        <div className="container-fluid">
+      <nav className="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div className="container">
           <Link to="/" className="navbar-brand">
             <img src="src/assets/logo2.png" alt="Logo" className="navbar-logo" />
           </Link>
@@ -37,8 +37,13 @@ const Navbar = () => {
                   Home
                 </Link>
               </li>
-              <li className="nav-item">
-                <DropdownButton id="dropdown" title="Meals" className="nav-link">
+              <li className="nav-item dropdown">
+                <DropdownButton
+                  id="dropdown"
+                  title="Meals"
+                  className="nav-link"
+                  menuVariant="dark"
+                >
                   <Dropdown.Item as={Link} to="/breakfast">
                     Breakfast
                   </Dropdown.Item>
