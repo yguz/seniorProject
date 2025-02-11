@@ -82,7 +82,7 @@ const Navbar = () => {
         <Route path="/breakfast" element={<iframe src="/breakfast.html" title="breakfast" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
         <Route path="/lunch" element={<iframe src="/lunch.html" title="lunch" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
         <Route path="/dinner" element={<iframe src="/dinner.html" title="dinner" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
-        <Route path="/results" element={<SearchResults />} /> {/* Add results route */}
+        <Route path="/results" element={<SearchResults />} />
       </Routes>
     </BrowserRouter>
   );
