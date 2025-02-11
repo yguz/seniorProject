@@ -6,16 +6,19 @@ const hashPassword = async (password) => {
   }
 
   const salt = await bcrypt.genSalt(10);
-  return bcrypt.hash(password, salt);
+  const hashedPassword = await bcrypt.hash(password, salt);
+  console.log("Generated Hashed Password:", hashedPassword);
+  return hashedPassword;
 };
 
 const comparePassword = async (plainPassword, hashedPassword) => {
   if (!plainPassword || !hashedPassword) {
+    console.log("Invalid password comparison inputs.");
     return false;
   }
 
   console.log("Comparing:", plainPassword, "with", hashedPassword);
-  return bcrypt.compare(plainPassword, hashedPassword);
+  return await bcrypt.compare(plainPassword, hashedPassword);
 };
 
 module.exports = { hashPassword, comparePassword };

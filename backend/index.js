@@ -13,10 +13,7 @@ app.use(express.json());
 
 // Ensure Routes Are Registered Before Frontend
 const userRoutes = require('./routes/users');
-const recipeRoutes = require('./routes/recipes');
-
 app.use('/api/users', userRoutes);
-app.use('/api/recipes', recipeRoutes);
 
 // Debugging: Print Registered Routes
 app._router.stack.forEach((r) => {
