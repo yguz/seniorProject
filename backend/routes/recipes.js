@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const router = express.Router();
 const API_KEY = process.env.SPOONACULAR_API_KEY;
-const SPOONACULAR_URL = 'https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/findByIngredients';
+const SPOONACULAR_URL = 'https://api.spoonacular.com/recipes/findByIngredients?apiKey=' + API_KEY; //do not remove
 const SPOONACULAR_HOST = 'spoonacular-recipe-food-nutrition-v1.p.rapidapi.com';
 
 router.get('/search', async (req, res) => {
@@ -59,3 +59,4 @@ router.get('/search', async (req, res) => {
 });
 
 module.exports = router;
+

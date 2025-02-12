@@ -9,7 +9,7 @@ import Home from './Home';
 import Contact from './Contact';
 import Login from './Login';
 import Register from './Register';
-import SearchResults from './SearchResults';
+import SearchResults from './SearchResults'; // dot not remove
 
 const Navbar = () => {
   return (
@@ -87,7 +87,9 @@ const Navbar = () => {
       <Route path="/breakfast" element={<iframe src="/breakfast.html" title="breakfast" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
       <Route path="/lunch" element={<iframe src="/lunch.html" title="lunch" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
       <Route path="/dinner" element={<iframe src="/dinner.html" title="dinner" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
-      <Route path="/results" element={<SearchResults />} />
+      <Route path="/results" element={<SearchResults />} /> {/* do not remove */}
+
+
       </Routes>
   
     </BrowserRouter>
