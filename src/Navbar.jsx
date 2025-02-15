@@ -9,15 +9,12 @@ import Home from './Home';
 import Contact from './Contact';
 import Login from './Login';
 import Register from './Register';
-import SearchResults from './SearchResults';
-
-
-
+import SearchResults from './SearchResults'; // dot not remove
 
 const Navbar = () => {
   return (
     <BrowserRouter>
-      <nav className="navbar navbar-expand-lg navbar-light" style={{ height: '100px' }}>
+     <nav className="navbar navbar-expand-lg navbar-light bg-beige">
         <div className="container">
           <Link to="/" className="navbar-brand">
             <img src="src/assets/logo2.png" alt="Logo" className="navbar-logo" />
@@ -43,7 +40,7 @@ const Navbar = () => {
                   id="dropdown"
                   title="Meals"
                   className="nav-link"
-                  menuVariant="light"
+      
                 >
                   <Dropdown.Item as={Link} to="/breakfast">
                     Breakfast
@@ -90,8 +87,11 @@ const Navbar = () => {
       <Route path="/breakfast" element={<iframe src="/breakfast.html" title="breakfast" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
       <Route path="/lunch" element={<iframe src="/lunch.html" title="lunch" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
       <Route path="/dinner" element={<iframe src="/dinner.html" title="dinner" style={{ width: '100%', height: '100vh', border: 'none' }} />} />
-      <Route path="/results" element={<SearchResults />} /> {/* Add results route */}
+      <Route path="/results" element={<SearchResults />} /> {/* do not remove */}
+
+
       </Routes>
+  
     </BrowserRouter>
   );
 };
