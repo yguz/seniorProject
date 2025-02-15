@@ -1,13 +1,13 @@
 /* Navbar.css */
 .navbar {
-  background-color: #1a1a1a !important;
-  padding: 0.5rem 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  font-family: 'Segoe UI', sans-serif;
+  background-color: #ffffff !important;
+  padding: 0.5rem 0; /* Reduced padding */
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  min-height: 60px; /* Fixed height */
 }
 
 .navbar-brand img {
-  height: 40px;
+  height: 75px;
   transition: transform 0.3s ease;
 }
 
@@ -16,7 +16,7 @@
 }
 
 .nav-link {
-  color: #fff !important;
+  color: #333 !important;
   position: relative;
   margin: 0 15px;
   padding: 8px 0 !important;
@@ -31,43 +31,45 @@
   height: 2px;
   bottom: 0;
   left: 0;
-  background: linear-gradient(90deg, #00ff88, #00ffee);
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   transform-origin: left;
 }
 
 .nav-link:hover::after {
   width: 100%;
-  box-shadow: 0 0 10px rgba(0, 255, 238, 0.5);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
 }
 
 .nav-link:hover {
-  color: #00ffdd !important;
+  color: #2563eb !important;
 }
 
 /* Dropdown styling */
 .dropdown-menu {
-  background-color: #2a2a2a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .dropdown-item {
-  color: #fff !important;
+  color: #333 !important;
   transition: all 0.3s ease;
 }
 
 .dropdown-item:hover {
-  background-color: #3a3a3a !important;
-  color: #00ffdd !important;
+  background-color: #f8f9fa !important;
+  color: #2563eb !important;
 }
 
 /* Responsive adjustments */
 @media (max-width: 992px) {
   .navbar-collapse {
-      background-color: #1a1a1a;
-      padding: 0.5rem;
-      margin-top: 0.5rem;
+      background-color: #ffffff;
+      padding: 1rem;
+      margin-top: 1rem;
       border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
   
   .nav-link {
@@ -75,12 +77,12 @@
   }
 }
 
-/* Add this to your existing CSS */
+/* Ensure content isn't hidden behind fixed navbar */
 body {
-  padding-top: 80px;
+  padding-top: 2px;
 }
 
-/* If you're using a specific container for your content */
-.main-content {
-  padding-top: 80px;
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0, 0, 0, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
+
