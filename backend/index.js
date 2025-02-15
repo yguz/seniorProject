@@ -13,7 +13,9 @@ app.use(express.json());
 
 // Ensure Routes Are Registered Before Frontend
 const userRoutes = require('./routes/users');
+const recipeRoutes = require('./routes/recipes');
 app.use('/api/users', userRoutes);
+app.use('/api/recipes', recipeRoutes);
 
 // Debugging: Print Registered Routes
 app._router.stack.forEach((r) => {
@@ -22,10 +24,14 @@ app._router.stack.forEach((r) => {
   }
 });
 
-// Serve Frontend Files (Must Come Last)
-app.use(express.static(path.join(__dirname, '../dist')));
+// Serve Frontend Files (Only if in Production)
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../src')));
+}
+
+// Handle Unknown API Routes
 app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, '../dist/index.html'));
+  res.status(404).json({ error: "API route not found" });
 });
 
 // Database Connection

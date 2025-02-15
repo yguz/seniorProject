@@ -4,8 +4,7 @@ require('dotenv').config();
 
 const router = express.Router();
 const API_KEY = process.env.SPOONACULAR_API_KEY;
-const SPOONACULAR_URL = 'https://api.spoonacular.com/recipes/findByIngredients?apiKey=' + API_KEY; //do not remove
-const SPOONACULAR_HOST = 'spoonacular-recipe-food-nutrition-v1.p.rapidapi.com';
+const SPOONACULAR_URL = 'https://api.spoonacular.com/recipes/findByIngredients';
 
 router.get('/search', async (req, res) => {
   try {
@@ -14,37 +13,23 @@ router.get('/search', async (req, res) => {
       return res.status(400).json({ error: 'Please provide ingredients' });
     }
 
-    // Remove any extra spaces to ensure proper API formatting
+    // Remove extra spaces from ingredients input
     ingredients = ingredients.replace(/\s+/g, '');
 
-    // Request parameters: ingredients and number (to limit the number of recipes returned)
+    // Request recipes from Spoonacular API
     const response = await axios.get(SPOONACULAR_URL, {
-      params: { ingredients, number: 10 } // Adjust number as needed
+      params: {
+        ingredients,
+        number: 10,  // Limit number of results
+        apiKey: API_KEY, // Pass API key as a query parameter
+      },
     });
 
     if (!response.data || response.data.length === 0) {
       return res.status(404).json({ error: 'No recipes found for the given ingredients' });
     }
 
-    // Fetch approximate prices for each recipe
-    const recipesWithPrices = await Promise.all(
-      response.data.map(async (recipe) => {
-        const ingredientNames = recipe.usedIngredients.map((i) => i.name)
-          .concat(recipe.missedIngredients.map((i) => i.name));
-        const estimatedPrice = await getAIPriceEstimate(ingredientNames);
-
-        return {
-          id: recipe.id,
-          title: recipe.title,
-          usedIngredientCount: recipe.usedIngredientCount,
-          missedIngredientCount: recipe.missedIngredientCount,
-          ingredients: ingredientNames,
-          estimatedPrice: `$${estimatedPrice.toFixed(2)}` // Format price as USD
-        };
-      })
-    );
-
-    res.json(recipesWithPrices);
+    res.json(response.data);
   } catch (error) {
     console.error('Error fetching recipes:', error);
 
@@ -59,4 +44,3 @@ router.get('/search', async (req, res) => {
 });
 
 module.exports = router;
-
