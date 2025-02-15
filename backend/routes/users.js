@@ -1,37 +1,39 @@
 const express = require('express');
 const { User } = require('../models/user');
 const { hashPassword, comparePassword } = require('../utils/hashPassword');
-const { decryptEmail } = require('../utils/encryption');
+const { encryptEmail } = require('../utils/encryption');
 
 const router = express.Router();
 
-// Route: Register a New User
+// Register Route
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, dietaryPreferences } = req.body;
-    console.log("Received registration data:", { name, email, dietaryPreferences });
+    const { email, password, name, dietaryPreferences } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
-      return res.status(400).json({ error: "Email already in use" });
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required." });
     }
 
-    // Hash the password
+    const encryptedEmail = encryptEmail(email);
+    console.log("Encrypted Email at Registration:", encryptedEmail);
+
+    const existingUser = await User.findOne({ where: { email: encryptedEmail } });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already in use' });
+    }
+
+    // Hash password before storing
     const hashedPassword = await hashPassword(password);
+    console.log("Hashed Password at Registration:", hashedPassword);
 
-    // Create the user
     const user = await User.create({
-      name,
-      email, 
+      name: name || null, // Allow name to be null
+      email: encryptedEmail,
       password: hashedPassword,
-      dietaryPreferences,
+      dietaryPreferences: dietaryPreferences || null, // Allow dietaryPreferences to be null
     });
 
-    res.status(201).json({
-      message: 'User registered successfully',
-      userId: user.id,
-    });
+    res.status(201).json({ message: 'User registered successfully', userId: user.id });
   } catch (error) {
     console.error('Error registering user:', error);
     res.status(500).json({ error: 'Failed to register user', details: error.message });
