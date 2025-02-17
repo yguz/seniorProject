@@ -1,27 +1,27 @@
 const crypto = require('crypto');
 require('dotenv').config();
 
-const algorithm = 'aes-256-cbc';
-const secretKey = process.env.ENCRYPTION_KEY || 'your-32-character-key-here';
-const iv = crypto.randomBytes(16);
+const secretKey = process.env.ENCRYPTION_KEY;
+
+if (!secretKey) {
+  console.error("ENCRYPTION_KEY is missing from environment variables.");
+  process.exit(1);
+}
+
+console.log("Using ENCRYPTION_KEY:", secretKey);
 
 const encryptEmail = (email) => {
-  const cipher = crypto.createCipheriv(algorithm, Buffer.from(secretKey), iv);
-  let encrypted = cipher.update(email, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  return `${iv.toString('hex')}:${encrypted}`;
+  if (!email) {
+    throw new Error("Email cannot be empty");
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  console.log("🔍 Email before hashing:", normalizedEmail);
+
+  const hash = crypto.createHash('sha256').update(normalizedEmail + secretKey, 'utf8').digest('hex').substring(0, 255);
+  console.log("Generated Encrypted Email:", hash);
+  
+  return hash;
 };
 
-const decryptEmail = (encryptedEmail) => {
-  const [ivHex, encryptedData] = encryptedEmail.split(':');
-  const decipher = crypto.createDecipheriv(
-    algorithm,
-    Buffer.from(secretKey),
-    Buffer.from(ivHex, 'hex')
-  );
-  let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
-  return decrypted;
-};
-
-module.exports = { encryptEmail, decryptEmail };
+module.exports = { encryptEmail };
