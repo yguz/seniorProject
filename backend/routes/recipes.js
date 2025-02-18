@@ -64,7 +64,7 @@ router.get('/search/:mealType', async (req, res) => {
 
     const apiUrl = `${SPOONACULAR_URL_MEAL_TYPE}?type=${mealType}&apiKey=${API_KEY}`;
     const response = await axios.get(apiUrl, {
-      params: { number: 15 }
+      params: { number: 6 }
     });
 
     if (!response.data || response.data.results.length === 0) {
