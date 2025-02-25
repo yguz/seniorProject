@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import RecipeCard from './RecipeCard';
 import './assets/searchResults.css';
@@ -10,35 +10,44 @@ const SearchResults = () => {
   const location = useLocation(); // Get the window location object (URL)
   const navigate = useNavigate(); // navigate back to search page if needed
 
-  // Extract query parameter from the URL (on initial load)
-  const query = new URLSearchParams(location.search).get('search');
+  const query = new URLSearchParams(location.search).get('search'); // Get query from URL
+  const firstRender = useRef(true); // Ref to track the initial render
 
-  useEffect(() => {
-    const fetchRecipes = async () => {
-      if (query) {
-        try {
-          const response = await fetch(`http://localhost:3000/api/recipes/search?ingredients=${query}`);
-          if (!response.ok) {
-            throw new Error(`Server Error: ${response.status}`);
-          }
-          const data = await response.json();
-          setRecipes(data);
-          setError(null);
-        } catch (err) {
-          setError(err.message);
+  const fetchRecipes = async (query) => {
+    if (query) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/recipes/search?ingredients=${query}`);
+        if (!response.ok) {
+          throw new Error(`Server Error: ${response.status}`);
         }
+        const data = await response.json();
+        setRecipes(data.recipes); // Access the 'recipes' array
+        setError(null);
+      } catch (err) {
+        setError(err.message);
       }
-    };
+    }
+  };
 
-    fetchRecipes();
-  }, [query]);
-
-  // this function handles search button click
+  // This function handles the search button click
   const handleSearch = () => {
     if (searchQuery.trim()) {
       navigate(`/results?search=${searchQuery}`);
     }
   };
+
+  // Fetch recipes when the search query changes, but avoid double fetching
+  useEffect(() => {
+    // Skip fetching on initial render
+    if (firstRender.current) {
+      firstRender.current = false;
+      return; // Don't trigger fetch on initial load (since it comes from the Search component)
+    }
+
+    if (query) {
+      fetchRecipes(query); // Fetch new recipes based on the query
+    }
+  }, [query]); // Only depend on query, no need to track the input searchQuery
 
   return (
     <div className="results-container">

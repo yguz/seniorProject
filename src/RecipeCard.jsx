@@ -9,26 +9,26 @@ const RecipeCard = ({ recipe }) => {
     setShowCommentBox(!showCommentBox);
   };
 
-  
-  /**
-   * Generate a random price (later on will be replaced with a price computed from using an API like chat gpt)
-   * using the ingredients rendered here
-   * */
-  const generateRandomPrice = () => {
-    return (Math.random() * (20 - 5) + 5).toFixed(2); // Random price between 5 and 20
-  };
-
-  // Set the price only once when the recipe is first loaded
+  // Set the price when the recipe is first loaded
   useEffect(() => {
-    setPrice(generateRandomPrice());
-  }, [recipe]); // change price when `recipe` data changes
+    // If the price is available in the recipe object and is a valid number
+    if (recipe.price && !isNaN(recipe.price) && recipe.price > 0) {
+      setPrice(recipe.price); // Set the price from the recipe data
+    } else {
+      setPrice(null); // Set price to null if it's 0 or invalid
+    }
+  }, [recipe]); // Update price when recipe data changes
+
+  // Don't render anything if the price is 0
+  if (price === null) return null;
 
   return (
     <div className="recipe-box">
       <div className="front">
         <img src={recipe.image} alt={recipe.title} />
         <h3>{recipe.title}</h3>
-        <p>{`$${price}`}</p>
+        {/* Display the price with toFixed only if it's a valid number */}
+        <p>{price !== null ? `$${price.toFixed(2)}` : 'Price unavailable'}</p>
       </div>
       <div className="back">
         <h3>{recipe.title}</h3>
