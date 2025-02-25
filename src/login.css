@@ -1,3 +1,7 @@
+.login-form, .register-form {
+  margin-top: 10rem;
+}
+
 input {
   width: 100%;
   padding: 12px;

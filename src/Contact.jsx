@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import'/src/assets/contact.css';
-
+import '/src/assets/contact.css';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -20,39 +19,41 @@ const Contact = () => {
   };
 
   return (
-    <div className="contact-container">
-      <h1 className="contact-title">Contact Us</h1>
-      <form onSubmit={handleSubmit} className="contact-form">
-        <input
-          type="text"
-          name="name"
-          placeholder="Your Name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-          className="contact-input"
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Your Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          className="contact-input"
-        />
-        <textarea
-          name="message"
-          placeholder="Your Message"
-          value={formData.message}
-          onChange={handleChange}
-          required
-          className="contact-textarea"
-        ></textarea>
-        <button type="submit" className="contact-button">
-          Send
-        </button>
-      </form>
+    <div className="contact-page-wrapper"> {/* Wrapper for centering */}
+      <div className="contact-container">
+        <h1 className="contact-title">Contact Us</h1>
+        <form onSubmit={handleSubmit} className="contact-form">
+          <input
+            type="text"
+            name="name"
+            placeholder="Your Name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            className="contact-input"
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Your Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="contact-input"
+          />
+          <textarea
+            name="message"
+            placeholder="Your Message"
+            value={formData.message}
+            onChange={handleChange}
+            required
+            className="contact-textarea"
+          ></textarea>
+          <button type="submit" className="contact-button">
+            Send
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

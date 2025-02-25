@@ -1,24 +1,45 @@
 import React from 'react';
-import Navbar from './Navbar';
-import Search from './Search';
-import './App.css'; 
-import './about.css';
-import'/src/assets/contact.css';
-import '/src/login.jsx';
-import Register from "./Register";
-import './Search.css';
-import myLogo from './assets/logo2.png'; 
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import Navbar from './Navbar'; // Import Navbar component
+import About from './About';
+import Home from './Home';
+import Contact from './Contact';
+import Login from './Login';
+import Register from './Register';
+import SearchResults from './SearchResults';
+import MealResults from './MealResults';
+import './App.css'; // Ensure you have a CSS file for transitions
 
+const App = () => {
+  const location = useLocation(); // Get the current route location
 
-
-
-function App() {
   return (
-    <>
-      <Navbar />
-    </>
+    <div>
+      <Navbar /> {/* Include the Navbar at the top */}
+      <TransitionGroup>
+        <CSSTransition
+          key={location.key}
+          timeout={500} // The transition duration
+          classNames="page" // Transition class names
+        >
+          <div className="page-wrapper">
+            <Routes location={location}>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/breakfast" element={<MealResults mealType="breakfast" />} />
+              <Route path="/lunch" element={<MealResults mealType="lunch" />} />
+              <Route path="/dinner" element={<MealResults mealType="dinner" />} />
+              <Route path="/results" element={<SearchResults />} />
+            </Routes>
+          </div>
+        </CSSTransition>
+      </TransitionGroup>
+    </div>
   );
-}
+};
 
 export default App;
-

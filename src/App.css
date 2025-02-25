@@ -37,3 +37,23 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Apply transition effects to the page */
+.page-enter {
+  opacity: 0;
+}
+.page-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in-out;
+}
+.page-exit {
+  opacity: 1;
+}
+.page-exit-active {
+  opacity: 0;
+  transition: opacity 500ms ease-in-out;
+}
+
+.page-wrapper {
+  position: relative;
+}
