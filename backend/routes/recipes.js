@@ -4,70 +4,39 @@ require('dotenv').config();
 
 const router = express.Router();
 const API_KEY = process.env.SPOONACULAR_API_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 const SPOONACULAR_URL = 'https://api.spoonacular.com/recipes/findByIngredients?apiKey=' + API_KEY;
 const SPOONACULAR_URL_MEAL_TYPE = 'https://api.spoonacular.com/recipes/complexSearch';
 const SPOONACULAR_RECIPE_URL = 'https://api.spoonacular.com/recipes';
 
-// Gemini API URL to fetch ingredient prices (change this to the actual Gemini endpoint)
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + GEMINI_API_KEY;
-
-// Helper function to get the total price for a list of ingredients
+// Helper function to get the total price for a list of ingredients using Spoonacular's price breakdown endpoint
 const getIngredientsPrice = async (ingredientList) => {
   let totalPrice = 0;
 
   try {
-    const apiUrl = `${GEMINI_API_URL}`;
+    // Construct the request to get the price breakdown from Spoonacular
+    const apiUrl = `https://api.spoonacular.com/recipes/${ingredientList.id}/priceBreakdownWidget.json?apiKey=${API_KEY}`;
+    
+    const response = await axios.get(apiUrl);
 
-    // Construct the request to estimate the price of the ingredient
-    const requestBody = {
-      contents: [
-        {
-          parts: [
-            {
-              text: `Please provide a reasonable total price for this list of ingredients: ${ingredientList}`,
-            },
-          ],
-        },
-      ],
-    };
-
-    const response = await axios.post(apiUrl, requestBody, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    // Check if candidates are available and extract price range
-    if (response.data && response.data.candidates && response.data.candidates.length > 0) {
-      const priceText = response.data.candidates[0]?.content?.parts[0]?.text || '';
-
-      // Extract the range (e.g., "$73 - $115") from the text
-      const priceRangeMatch = priceText.match(/\$(\d+(?:\.\d+)?)\s*-\s*\$(\d+(?:\.\d+)?)/);
-
-      if (priceRangeMatch) {
-        // If a range is found, calculate the average
-        const minPrice = parseFloat(priceRangeMatch[1]);
-        const maxPrice = parseFloat(priceRangeMatch[2]);
-        totalPrice = (minPrice + maxPrice) / 2;
-        console.log('Price range found: ', minPrice, maxPrice, 'Average Price: ', totalPrice);
-      } else {
-        // If no range is found, fallback to $0 or another logic
-        console.log('No price range found in text.');
-        totalPrice = 0;
-      }
+    // Check if the response contains the expected price data
+    if (response.data && response.data.ingredients) {
+      // Calculate the total price by summing the price of each ingredient
+      totalPrice = response.data.totalCostPerServing;
+      console.log('Total Price from Spoonacular:', totalPrice);
     } else {
-      console.log('No candidates or unexpected response structure.');
+      console.log('No ingredients or price data found.');
+      totalPrice = 0;
     }
 
-    console.log('Total Price: ', totalPrice);
   } catch (error) {
-    console.error(`Error fetching price for ingredients ${ingredientList}:`, error);
+    console.error(`Error fetching price for ingredients:`, error);
+    totalPrice = 0;  // Fallback value
   }
 
   return totalPrice;
 };
+
 
 // Route to search by ingredients
 router.get('/search', async (req, res) => {
@@ -91,17 +60,10 @@ router.get('/search', async (req, res) => {
 
     // Calculate the total price for each recipe's ingredients
     const recipeDetailsPromises = response.data.map(async (recipe) => {
-      const allIngredients = [
-        ...recipe.usedIngredients.map(i => i.name),
-        ...recipe.missedIngredients.map(i => i.name)
-      ];
 
-      // Remove duplicates by converting to a Set and back to an array
-      const uniqueIngredients = [...new Set(allIngredients)];
-
-      // Get the price for the ingredients in this recipe
-      const recipePrice = await getIngredientsPrice(uniqueIngredients);
-
+      // Get the price for the ingredients in this recipe by passing recipe id
+      const recipePrice = await getIngredientsPrice({ id: recipe.id });
+    
       return {
         id: recipe.id,
         title: recipe.title,
@@ -137,7 +99,6 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// Route to search by meal type (lunch, breakfast, or dinner)
 router.get('/search/:mealType', async (req, res) => {
   try {
     const { mealType } = req.params;
@@ -149,7 +110,7 @@ router.get('/search/:mealType', async (req, res) => {
 
     const apiUrl = `${SPOONACULAR_URL_MEAL_TYPE}?type=${mealType}&apiKey=${API_KEY}`;
     const response = await axios.get(apiUrl, {
-      params: { number: 6 }
+      params: { number: 6 }  // You can adjust the number of results
     });
 
     if (!response.data || response.data.results.length === 0) {
@@ -159,29 +120,28 @@ router.get('/search/:mealType', async (req, res) => {
     // Fetch detailed information for each recipe by ID
     const recipeDetailsPromises = response.data.results.map(async (recipe) => {
       try {
+        // Fetch detailed information for each recipe using its ID
         const recipeDetailResponse = await axios.get(`${SPOONACULAR_RECIPE_URL}/${recipe.id}/information`, {
           params: { apiKey: API_KEY }
         });
 
+        // Get unique ingredients
+        const uniqueIngredients = [...new Set(recipeDetailResponse.data.extendedIngredients.map(i => i.name))];
+
+        // Calculate the price for the recipe
+        const recipePrice = await getIngredientsPrice({ id: recipe.id });
+
         // Format the response for frontend display
-        const recipeDetails = {
+        return {
           id: recipe.id,
           title: recipe.title,
           image: recipe.image,
           usedIngredientCount: recipeDetailResponse.data.usedIngredientCount,
           missedIngredientCount: recipeDetailResponse.data.missedIngredientCount,
-          ingredients: recipeDetailResponse.data.extendedIngredients.map(i => i.name), // List of ingredients
+          ingredients: uniqueIngredients,
+          price: recipePrice,  // Add price to the response
           instructions: recipeDetailResponse.data.instructions, // Cooking instructions
         };
-
-        // Calculate the price for this recipe
-        const uniqueIngredients = [
-          ...recipeDetailResponse.data.extendedIngredients.map(i => i.name)
-        ];
-        recipeDetails.price = await getIngredientsPrice(uniqueIngredients); // Append price to the recipe
-
-        return recipeDetails;
-
       } catch (err) {
         console.error('Error fetching recipe details:', err);
         return null; // In case there's an error fetching details for a recipe
@@ -191,21 +151,26 @@ router.get('/search/:mealType', async (req, res) => {
     // Wait for all detailed recipe info to be fetched
     const detailedRecipes = await Promise.all(recipeDetailsPromises);
 
-    // Filter null values
+    // Filter out any null values (recipes with errors fetching details)
     const validRecipes = detailedRecipes.filter(recipe => recipe !== null);
 
+    // Send the final list of valid recipes
     res.json(validRecipes);
   } catch (error) {
     console.error('Error fetching recipes:', error);
 
+    // Handle errors from Spoonacular API response
     if (error.response) {
       return res.status(error.response.status).json({
         error: `Spoonacular API error: ${error.response.statusText}`,
       });
     }
 
+    // Handle any other errors
     res.status(500).json({ error: 'Failed to fetch recipes' });
   }
 });
+
+
 
 module.exports = router;
