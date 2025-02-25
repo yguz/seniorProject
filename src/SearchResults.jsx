@@ -7,6 +7,7 @@ const SearchResults = () => {
   const [recipes, setRecipes] = useState([]);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); // New state to hold search input
+  const [loading, setLoading] = useState(true);  // Track loading state
   const location = useLocation(); // Get the window location object (URL)
   const navigate = useNavigate(); // navigate back to search page if needed
 
@@ -15,6 +16,7 @@ const SearchResults = () => {
 
   const fetchRecipes = async (query) => {
     if (query) {
+      setLoading(true); // Set loading to true before making the request
       try {
         const response = await fetch(`http://localhost:3000/api/recipes/search?ingredients=${query}`);
         if (!response.ok) {
@@ -25,6 +27,9 @@ const SearchResults = () => {
         setError(null);
       } catch (err) {
         setError(err.message);
+        setRecipes([]);  // Clear the recipes in case of an error
+      } finally {
+        setLoading(false); // Set loading to false once the request is completed
       }
     }
   };
@@ -66,13 +71,16 @@ const SearchResults = () => {
 
       {error && <p className="error">Error: {error}</p>}
 
+      {/* Display loading spinner when loading */}
+      {loading && <div className="spinner"></div>} 
+
       <div className="container">
         {recipes.length > 0 ? (
           recipes.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))
         ) : (
-          <p>No recipes found.</p>
+          !loading && <p>No recipes found.</p>  // Display message if no recipes and not loading
         )}
       </div>
     </div>
