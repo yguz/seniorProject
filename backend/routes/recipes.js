@@ -9,34 +9,89 @@ const SPOONACULAR_URL = 'https://api.spoonacular.com/recipes/findByIngredients?a
 const SPOONACULAR_URL_MEAL_TYPE = 'https://api.spoonacular.com/recipes/complexSearch';
 const SPOONACULAR_RECIPE_URL = 'https://api.spoonacular.com/recipes';
 
-// Helper function to get the total price for a list of ingredients using Spoonacular's price breakdown endpoint
-const getIngredientsPrice = async (ingredientList) => {
+// Gemini API URL to fetch ingredient prices
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + process.env.GEMINI_API_KEY;
+
+// Helper function to prepare ingredients for Gemini API
+const prepareIngredientsForGemini = (usedIngredients, missedIngredients) => {
+  const allIngredients = [];
+
+  // Extract and format used ingredients
+  usedIngredients.forEach(ingredient => {
+    const ingredientString = `${ingredient.amount} ${ingredient.unitShort} of ${ingredient.name}`;
+    allIngredients.push(ingredientString);
+  });
+
+  // Extract and format missed ingredients
+  missedIngredients.forEach(ingredient => {
+    const ingredientString = `${ingredient.amount} ${ingredient.unitShort} of ${ingredient.name}`;
+    allIngredients.push(ingredientString);
+  });
+
+  return allIngredients;
+};
+
+// Helper function to get the total price for a list of ingredients using the Gemini API
+const getIngredientsPrice = async (usedIngredients, missedIngredients) => {
+  console.log('Used Ingredients: ', usedIngredients);
+  console.log('Missed Ingredients: ', missedIngredients);
+  
+  const ingredientList = prepareIngredientsForGemini(usedIngredients, missedIngredients);
   let totalPrice = 0;
 
   try {
-    // Construct the request to get the price breakdown from Spoonacular
-    const apiUrl = `https://api.spoonacular.com/recipes/${ingredientList.id}/priceBreakdownWidget.json?apiKey=${API_KEY}`;
-    
-    const response = await axios.get(apiUrl);
+    // Construct the request to estimate the price of the ingredient
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            {
+              text: `Please provide a reasonable total price for the following list of ingredients, and include the price in the format: "**Total Estimated Price:** $minPrice - $maxPrice": ${ingredientList.join(', ')}`,
+            },
+          ],
+        },
+      ],
+    };
 
-    // Check if the response contains the expected price data
-    if (response.data && response.data.ingredients) {
-      // Calculate the total price by summing the price of each ingredient
-      totalPrice = response.data.totalCostPerServing;
-      console.log('Total Price from Spoonacular:', totalPrice);
+    // Make a POST request to the Gemini API
+    const response = await axios.post(GEMINI_API_URL, requestBody, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    // Check if candidates are available and extract price range
+    if (response.data && response.data.candidates && response.data.candidates.length > 0) {
+      const priceText = response.data.candidates[0]?.content?.parts[0]?.text || '';
+
+      // Log the priceText to see the full explanation
+      console.log('Extracted price text: ', priceText);
+
+      // Extract the "Total Estimated Price" range (e.g., "$13 - $28") from the text
+      const totalPriceRangeMatch = priceText.match(/\*\*Total Estimated Price:\*\*\s*\$(\d+(?:\.\d+)?)\s*-\s*\$(\d+(?:\.\d+)?)/);
+
+      if (totalPriceRangeMatch) {
+        // If a range is found, calculate the average
+        const minPrice = parseFloat(totalPriceRangeMatch[1]);
+        const maxPrice = parseFloat(totalPriceRangeMatch[2]);
+        totalPrice = (minPrice + maxPrice) / 2;
+        console.log('Total Price Range found: ', minPrice, maxPrice, 'Average Price: ', totalPrice);
+      } else {
+        // If no total price range is found, fallback to a default price of $0
+        console.log('No total price range found in text.');
+        totalPrice = 0;
+      }
     } else {
-      console.log('No ingredients or price data found.');
-      totalPrice = 0;
+      console.log('No candidates or unexpected response structure.');
     }
 
+    console.log('Total Price: ', totalPrice);
   } catch (error) {
-    console.error(`Error fetching price for ingredients:`, error);
-    totalPrice = 0;  // Fallback value
+    console.error(`Error fetching price for ingredients ${ingredientList}:`, error);
   }
 
   return totalPrice;
 };
-
 
 // Route to search by ingredients
 router.get('/search', async (req, res) => {
@@ -60,20 +115,16 @@ router.get('/search', async (req, res) => {
 
     // Calculate the total price for each recipe's ingredients
     const recipeDetailsPromises = response.data.map(async (recipe) => {
+      console.log('Recipe ingredients: ', recipe.usedIngredients);
 
       // Get the price for the ingredients in this recipe by passing recipe id
-      const recipePrice = await getIngredientsPrice({ id: recipe.id });
+      const recipePrice = await getIngredientsPrice(recipe.usedIngredients, recipe.missedIngredients);
     
       return {
         id: recipe.id,
         title: recipe.title,
         image: recipe.image,
-        usedIngredientCount: recipe.usedIngredientCount,
-        missedIngredientCount: recipe.missedIngredientCount,
-        ingredients: [
-          ...recipe.usedIngredients.map(i => i.name),
-          ...recipe.missedIngredients.map(i => i.name)
-        ],
+        ingredients: [...recipe.usedIngredients, ...recipe.missedIngredients], // Include both used and missed ingredients
         price: recipePrice,  // Include the price for each recipe
       };
     });
@@ -99,6 +150,7 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// Route to search by meal type (lunch, breakfast, dinner)
 router.get('/search/:mealType', async (req, res) => {
   try {
     const { mealType } = req.params;
@@ -125,20 +177,15 @@ router.get('/search/:mealType', async (req, res) => {
           params: { apiKey: API_KEY }
         });
 
-        // Get unique ingredients
-        const uniqueIngredients = [...new Set(recipeDetailResponse.data.extendedIngredients.map(i => i.name))];
-
         // Calculate the price for the recipe
-        const recipePrice = await getIngredientsPrice({ id: recipe.id });
+        const recipePrice = await getIngredientsPrice(recipe.usedIngredients, recipe.missedIngredients);
 
         // Format the response for frontend display
         return {
           id: recipe.id,
           title: recipe.title,
           image: recipe.image,
-          usedIngredientCount: recipeDetailResponse.data.usedIngredientCount,
-          missedIngredientCount: recipeDetailResponse.data.missedIngredientCount,
-          ingredients: uniqueIngredients,
+          ingredients: [...recipe.usedIngredients, ...recipe.missedIngredients], // Include both used and missed ingredients
           price: recipePrice,  // Add price to the response
           instructions: recipeDetailResponse.data.instructions, // Cooking instructions
         };
@@ -170,7 +217,5 @@ router.get('/search/:mealType', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch recipes' });
   }
 });
-
-
 
 module.exports = router;

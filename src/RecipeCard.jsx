@@ -19,7 +19,7 @@ const RecipeCard = ({ recipe }) => {
     }
   }, [recipe]); // Update price when recipe data changes
 
-  // Don't render anything if the price is 0
+  // Don't render anything if the price is 0 or unavailable
   if (price === null) return null;
 
   return (
@@ -32,11 +32,28 @@ const RecipeCard = ({ recipe }) => {
       </div>
       <div className="back">
         <h3>{recipe.title}</h3>
-        <p><b>Ingredients:</b> {recipe.ingredients.join(', ')}</p>
+        
+        {/* Render ingredients by displaying their 'original' field */}
+        <p><b>Ingredients:</b></p>
+        <ul>
+          {recipe.ingredients && recipe.ingredients.length > 0 ? (
+            recipe.ingredients.map((ingredient, index) => (
+              <li key={index}>
+                {ingredient.original || 'Unknown Ingredient'}
+              </li>
+            ))
+          ) : (
+            <li>No ingredients available.</li>
+          )}
+        </ul>
+
+        {/* Display instructions */}
         <p><b>Instructions:</b> {recipe.instructions ? recipe.instructions : "No instructions available."}</p>
+
         <button className="comment-btn" onClick={toggleCommentBox}>
           Add Comment
         </button>
+
         {showCommentBox && (
           <div className="comment-box active">
             <textarea placeholder="Enter your comment here..."></textarea>
