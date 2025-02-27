@@ -150,6 +150,78 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// Helper function to prepare ingredients for Gemini API
+const prepareIngredientsForGeminiMealType = (usedIngredients) => {
+  // Generate a list of ingredients formatted for Gemini
+  return usedIngredients.map(ingredient => {
+    return ingredient.original.replace(/^(\d+(\.\d+)?) (.+)$/, (match, amount, _, name) => {
+      return `${amount} ${name}`;
+    });
+  });
+};
+
+// Helper function to get the total price for a list of ingredients using the Gemini API
+const getIngredientsPriceMealType = async (usedIngredients) => {
+  console.log('Used Ingredients: ', usedIngredients);
+  
+  // Prepare the ingredients for the Gemini API request
+  const ingredientList = prepareIngredientsForGeminiMealType(usedIngredients);
+  let totalPrice = 0;
+
+  try {
+    // Construct the Gemini API request body
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            {
+              text: `Please provide a reasonable total price for the following list of ingredients, and include the price in the format: "**Total Estimated Price:** $minPrice - $maxPrice": ${ingredientList.join(', ')}`,
+            },
+          ],
+        },
+      ],
+    };
+
+    // Make the POST request to the Gemini API
+    const response = await axios.post(GEMINI_API_URL, requestBody, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    // Check if there are any candidates and extract the price range
+    if (response.data && response.data.candidates && response.data.candidates.length > 0) {
+      const priceText = response.data.candidates[0]?.content?.parts[0]?.text || '';
+
+      // Log the full price explanation
+      console.log('Extracted price text: ', priceText);
+
+      // Extract the price range from the response (e.g., "$13 - $28")
+      const totalPriceRangeMatch = priceText.match(/\*\*Total Estimated Price:\*\*\s*\$(\d+(?:\.\d+)?)\s*-\s*\$(\d+(?:\.\d+)?)/);
+
+      if (totalPriceRangeMatch) {
+        // If a price range is found, calculate the average price
+        const minPrice = parseFloat(totalPriceRangeMatch[1]);
+        const maxPrice = parseFloat(totalPriceRangeMatch[2]);
+        totalPrice = (minPrice + maxPrice) / 2;
+        console.log('Total Price Range found: ', minPrice, maxPrice, 'Average Price: ', totalPrice);
+      } else {
+        // If no price range is found, set totalPrice to 0 as a fallback
+        console.log('No total price range found in text.');
+        totalPrice = 0;
+      }
+    } else {
+      console.log('No candidates or unexpected response structure.');
+    }
+
+    console.log('Total Price: ', totalPrice);
+  } catch (error) {
+    console.error(`Error fetching price for ingredients ${ingredientList}:`, error);
+  }
+
+  return totalPrice;
+};
+
 // Route to search by meal type (lunch, breakfast, dinner)
 router.get('/search/:mealType', async (req, res) => {
   try {
@@ -172,25 +244,50 @@ router.get('/search/:mealType', async (req, res) => {
     // Fetch detailed information for each recipe by ID
     const recipeDetailsPromises = response.data.results.map(async (recipe) => {
       try {
-        // Fetch detailed information for each recipe using its ID
-        const recipeDetailResponse = await axios.get(`${SPOONACULAR_RECIPE_URL}/${recipe.id}/information`, {
-          params: { apiKey: API_KEY }
-        });
+        // Ensure that recipe.id exists and is valid
+        if (recipe.id && recipe.id > 0) {
+          // Fetch ingredients using the correct endpoint
+          const recipeIngredientsResponse = await axios.get(`${SPOONACULAR_RECIPE_URL}/${recipe.id}/ingredientWidget.json`, {
+            params: { apiKey: API_KEY }
+          });
 
-        // Calculate the price for the recipe
-        const recipePrice = await getIngredientsPrice(recipe.usedIngredients, recipe.missedIngredients);
+          console.log('Fetched ingredients for recipe ID:', recipe.id);
 
-        // Format the response for frontend display
-        return {
-          id: recipe.id,
-          title: recipe.title,
-          image: recipe.image,
-          ingredients: [...recipe.usedIngredients, ...recipe.missedIngredients], // Include both used and missed ingredients
-          price: recipePrice,  // Add price to the response
-          instructions: recipeDetailResponse.data.instructions, // Cooking instructions
-        };
+          // Get the ingredients from the response
+          const ingredients = recipeIngredientsResponse.data.ingredients;
+
+          // Prepare the ingredients for the Gemini price calculation
+           // Prepare ingredients for the Gemini price calculation
+           const preparedIngredients = ingredients.map(ingredient => {
+            return {
+              original: `${ingredient.amount.metric.value} ${ingredient.amount.metric.unit} ${ingredient.name}`,
+            };
+          });
+
+          // Calculate the price for the recipe
+          const recipePrice = await getIngredientsPriceMealType(preparedIngredients);
+
+          // Format the response for frontend display
+          return {
+            id: recipe.id,
+            title: recipe.title,
+            image: recipe.image,
+            ingredients: preparedIngredients, // Include both used and missed ingredients
+            price: recipePrice,  // Add price to the response
+            instructions: recipeIngredientsResponse.data.instructions, // Cooking instructions
+          };
+        } else {
+          console.log('Invalid recipe ID:', recipe.id);
+          return null;
+        }
       } catch (err) {
-        console.error('Error fetching recipe details:', err);
+        console.error('Error fetching ingredients for recipe ID:', recipe.id);
+        if (err.response) {
+          console.error('Response status:', err.response.status);
+          console.error('Response data:', err.response.data);
+        } else {
+          console.error('Error message:', err.message);
+        }
         return null; // In case there's an error fetching details for a recipe
       }
     });
@@ -217,5 +314,7 @@ router.get('/search/:mealType', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch recipes' });
   }
 });
+
+
 
 module.exports = router;
