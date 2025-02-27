@@ -6,6 +6,10 @@ const RecipeCard = ({ recipe }) => {
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [price, setPrice] = useState(null); // State to store the price
   const [liked, setLiked] = useState(false); // State to track if the recipe is liked
+  const [errorMessage, setErrorMessage] = useState(''); // State to hold error message
+
+  const userId = sessionStorage.getItem("userId");
+
 
   const toggleCommentBox = () => {
     setShowCommentBox(!showCommentBox);
@@ -13,20 +17,48 @@ const RecipeCard = ({ recipe }) => {
 
   // Set the price when the recipe is first loaded
   useEffect(() => {
-    // If the price is available in the recipe object and is a valid number
     if (recipe.price && !isNaN(recipe.price) && recipe.price > 0) {
-      setPrice(recipe.price); // Set the price from the recipe data
+      setPrice(recipe.price);
     } else {
-      setPrice(null); // Set price to null if it's 0 or invalid
+      setPrice(null);
     }
-  }, [recipe]); // Update price when recipe data changes
+  }, [recipe]);
 
-  // Don't render anything if the price is 0 or unavailable
   if (price === null) return null;
 
   // Handle toggling like status
   const toggleLike = () => {
+    if (!userId) {
+      setErrorMessage('You need to be logged in to like a recipe');
+      return;
+    }
+
     setLiked(!liked);
+    likeRecipe(recipe.id, userId); // Call the function to "like" the recipe
+  };
+
+  // Function to send the "like" to the backend
+  const likeRecipe = async (recipeId, userId) => {
+    try {
+      const response = await fetch('/api/likes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipeId: recipeId,
+          userId: userId, // Using userId to associate the "like"
+        }),
+      });
+
+      if (response.ok) {
+        console.log('Recipe liked successfully');
+      } else {
+        console.error('Failed to like recipe');
+      }
+    } catch (error) {
+      console.error('Error while liking recipe:', error);
+    }
   };
 
   return (
@@ -34,42 +66,33 @@ const RecipeCard = ({ recipe }) => {
       <div className="front">
         <img src={recipe.image} alt={recipe.title} />
         <h3>{recipe.title}</h3>
-        {/* Display the price with toFixed only if it's a valid number */}
         <p>{price !== null ? `$${price.toFixed(2)}` : 'Price unavailable'}</p>
       </div>
       <div className="back">
-                 {/* Heart toggle icon */}
-                 <div className="like-btn mb-5" onClick={toggleLike}>
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
+
+        <div className="like-btn" onClick={toggleLike}>
           {liked ? (
-            <FaHeart color="red" size={24} /> // Liked state
+            <FaHeart color="red" size={24} />
           ) : (
-            <FaRegHeart color="grey" size={24} /> // Unliked state
+            <FaRegHeart color="grey" size={24} />
           )}
         </div>
         <div>
-        <h3>{recipe.title}</h3>
+          <h3>{recipe.title}</h3>
         </div>
 
-        <div>
-    
-        </div>
-       
-        
-        {/* Render ingredients by displaying their 'original' field */}
         <p><b>Ingredients:</b></p>
         <ul>
           {recipe.ingredients && recipe.ingredients.length > 0 ? (
             recipe.ingredients.map((ingredient, index) => (
-              <li key={index}>
-                {ingredient.original || 'Unknown Ingredient'}
-              </li>
+              <li key={index}>{ingredient.original || 'Unknown Ingredient'}</li>
             ))
           ) : (
             <li>No ingredients available.</li>
           )}
         </ul>
 
-        {/* Display instructions */}
         <p><b>Instructions:</b> {recipe.instructions ? recipe.instructions : "No instructions available."}</p>
 
         <button className="comment-btn" onClick={toggleCommentBox}>
@@ -82,8 +105,6 @@ const RecipeCard = ({ recipe }) => {
             <button className="submit-comment">Submit</button>
           </div>
         )}
-        
-     
       </div>
     </div>
   );
