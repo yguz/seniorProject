@@ -1,13 +1,19 @@
+/* Navbar styles */
 .navbar {
   height: 5.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f9f9f9; 
+  background-color: #f9f9f9;
   padding: 0 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed; /* Make navbar fixed at top */
+  top: 0;
+  width: 100%;
+  z-index: 1000; /* Ensure the navbar stays on top */
 }
 
+/* Navbar brand logo */
 .navbar-brand {
   font-size: 1.5rem;
   font-weight: bold;
@@ -15,14 +21,15 @@
   text-align: center;
 }
 
+/* Logo styling */
 .navbar-logo {
   height: 4.5rem;
   border-radius: 50%;
   object-fit: cover;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-
+/* Navbar links container */
 .navbar-center .nav-links {
   list-style: none;
   display: flex;
@@ -31,8 +38,9 @@
   padding: 0;
 }
 
+/* Navbar link styles */
 .navbar-center .nav-links li a {
-  color: #333; 
+  color: #333;
   text-decoration: none;
   font-size: 1rem;
   font-weight: 500;
@@ -42,10 +50,11 @@
 
 .navbar-center .nav-links li a:hover {
   color: #fff;
-  background-color: #0073e6; 
+  background-color: #0073e6;
   border-radius: 0.5rem;
 }
 
+/* Navbar right side items (cart, user, etc.) */
 .navbar-right {
   display: flex;
   align-items: center;
@@ -63,11 +72,11 @@
 
 .navbar-right .cart-icon:hover,
 .navbar-right .user-icon:hover {
-  color: #0073e6; 
+  color: #0073e6;
 }
 
 .navbar-right .cart-count {
-  background-color: #f44336; 
+  background-color: #f44336;
   color: #fff;
   border-radius: 50%;
   padding: 0.2rem 0.6rem;
@@ -78,6 +87,7 @@
   right: -0.5rem;
 }
 
+/* Dropdown menu styling */
 .dropdown {
   border: 1px solid #ccc;
   border-radius: 0.5rem;
@@ -87,8 +97,207 @@
 #dropdown {
   background-color: #f9f9f9;
   border: white;
-  color: rgba(0,0,0, 0.65)
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* Styles for the collapsed navbar (on small screens) */
+.navbar-collapse {
+  background-color: #f9f9f9; /* Ensure background color when collapsed */
+  padding: 1rem 0; /* Add padding when navbar collapses */
+}
+
+/* Navbar toggler (hamburger menu) */
+
+/* Mobile-specific styles */
+@media (max-width: 991px) {
+  /* Add padding to prevent content from overlapping with fixed navbar */
+  .main-content {
+    padding-top: 5.5rem; /* Adjust this based on the navbar height */
+  }
+
+  /* Change the navbar height when in collapsed mode */
+  .navbar {
+    height: auto;
+    padding: 1rem 2rem;
+  }
+
+  /* Ensure the navbar links are displayed properly in collapsed mode */
+  .navbar-center .nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .navbar-center .nav-links li a {
+    padding: 1rem 2rem; /* Add padding for better clickability */
+  }
+
+  /* Toggler icon position adjustment */
+  .navbar-toggler {
+    margin-right: 0; /* Make sure it's aligned properly */
+    font-size: 1.2rem;
+    font-weight: 500
+  }
 }
 
 
+/* Reset margin and padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  height: 100%; /* Ensure the body and html elements take up full height */
+}
+
+body {
+  font-family: 'Arial', sans-serif; /* Or any font of your choice */
+}
+
+/* Ensures that the navbar and dropdown are positioned properly */
+.navbar-nav {
+  display: flex;
+  justify-content: center; /* Center the navbar items */
+  width: 100%;
+}
+
+.navbar-nav .nav-item {
+  display: flex;
+  justify-content: center; /* Center individual nav items */
+  align-items: center;
+  position: relative; /* Make sure dropdown is positioned relative to the nav-item */
+}
+
+.navbar-nav .nav-item .nav-link {
+  display: block;
+  text-align: center;
+}
+
+.navbar-nav .nav-item .dropdown {
+  display: flex;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.navbar-nav .nav-item .dropdown-menu {
+  position: absolute; /* Position dropdown absolutely */
+  top: 100%; /* Ensures dropdown opens below the button */
+  left: 0;
+  right: 0;
+  z-index: 1000; /* Ensures dropdown appears above other content */
+  margin-top: 0.5rem; /* Adds a little space between the dropdown and the button */
+}
+
+/* Ensure that dropdown button is not pushed down on small screens */
+@media (max-width: 768px) {
+  .navbar-nav .nav-item {
+    position: relative;
+  }
+}
+
+/* Styling the dropdown button */
+.navbar-nav .nav-item .dropdown-button {
+  padding: 0.5rem 1rem; /* Adds padding inside the dropdown button */
+  font-size: 1.2rem; /* Adjusts the font size */
+  background-color: #f9f9f9; /* Light background color for better visibility */
+  border-radius: 0.25rem; /* Rounded corners */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Adds a light shadow to the dropdown button */
+  transition: background-color 0.3s ease; /* Smooth background color transition on hover */
+}
+
+.navbar-nav .nav-item .dropdown-button:hover {
+  background-color: #0073e6; /* Background color on hover */
+  color: white; /* Changes text color on hover */
+}
+
+/* Styling the dropdown menu */
+.navbar-nav .nav-item .dropdown-menu {
+  position: absolute; /* Keeps the dropdown menu position below the button */
+  top: 100%;
+  left: 0;
+  right: 0;
+  padding: 1rem; /* Adds padding inside the dropdown menu */
+  width: auto; /* Adjusts the width of the dropdown to fit its content */
+  background-color: #fff; /* Background color for the dropdown menu */
+  border-radius: 0.5rem; /* Rounded corners for the dropdown menu */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Adds shadow for better visual appeal */
+  z-index: 1000; /* Ensures dropdown is visible on top of other content */
+}
+
+/* Add space between dropdown items */
+.navbar-nav .nav-item .dropdown-item {
+  padding: 0.75rem 1.5rem; /* Adds more padding between items */
+  font-size: 1.1rem; /* Adjust font size */
+  transition: background-color 0.3s ease; /* Adds smooth hover effect */
+}
+
+/* Hover effect on dropdown items */
+.navbar-nav .nav-item .dropdown-item:hover {
+  background-color: #f1f1f1; /* Light grey background on hover */
+  color: #0073e6; /* Changes text color on hover */
+  border-radius: 0.3rem; /* Rounded corners on hover */
+}
+
+/* Ensure the dropdown button and menu are aligned properly */
+.navbar-nav .nav-item {
+  position: relative; /* Needed for positioning the dropdown menu */
+}
+
+/* For small screens, tweak the dropdown button */
+@media (max-width: 768px) {
+  .navbar-nav .nav-item .dropdown-menu {
+    width: 100%; /* Ensure dropdown takes full width on mobile */
+    left: 0; /* Align the dropdown to the left */
+    right: auto; /* Avoid the dropdown overflowing on the right */
+  }
+}
+
+/* Reduced space between the navbar items (links) */
+.navbar-nav .nav-item {
+  margin-left: 1rem; /* Reduced space between each item */
+  margin-right: 1rem; /* Reduced space between each item */
+}
+
+/* Use gap for tighter spacing between items */
+.navbar-nav {
+  display: flex;
+  gap: 1rem; /* Reduced space between the navigation items */
+  align-items: center; /* Ensure proper alignment */
+}
+
+/* Adjust the padding of the nav-link (if you want less space inside the tabs) */
+.navbar-nav .nav-item .nav-link {
+  padding: 0.5rem 1rem; /* Slightly reduced padding for less space inside each tab */
+  font-size: 1rem; /* Optional: Adjust font size to balance with spacing */
+}
+
+/* For larger screens, apply tighter spacing */
+@media (min-width: 992px) {
+  .navbar-nav .nav-item {
+    margin-left: 1rem; /* Reduced space between items for larger screens */
+    margin-right: 1rem; /* Reduced space between items for larger screens */
+  }
+}
+
+/* Adjust the font size of the navbar links */
+.navbar-nav .nav-item .nav-link {
+  padding: 0.5rem 1rem; /* Keep the padding for spacing */
+  font-size: 1.1rem; /* Increased font size */
+  font-weight: 500; /* Optionally adjust font weight */
+}
+
+/* Optional: Adjust the font size for the navbar brand/logo */
+.navbar-brand {
+  font-size: 1.8rem; /* Increased font size of the brand */
+}
+
+/* For larger screens, ensure consistency */
+@media (min-width: 992px) {
+  .navbar-nav .nav-item .nav-link {
+    font-size: 1.2rem; /* Slightly larger font size for desktop */
+  }
+}
 
