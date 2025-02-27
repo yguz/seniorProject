@@ -163,3 +163,61 @@
           font-size: 2em;
       }
   }
+
+  .recipe-box {
+    position: relative;
+    width: 100%; /* Ensure the card takes full width */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .back {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding-right: 40px; /* Ensure space for the heart icon */
+  }
+  
+  .back h3 {
+    word-wrap: break-word; /* Allow long words to break and wrap */
+    word-break: break-word; /* Break long words */
+    margin: 1rem; /* Remove default margin */
+    flex-grow: 1; /* Ensure title takes up available space */
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .like-btn {
+    position: absolute; /* Position the heart icon on the top-right corner */
+    top: 10px; /* Adjust vertical space */
+    right: 10px; /* Adjust horizontal space */
+    cursor: pointer;
+  }
+  
+  .like-btn svg {
+    transition: color 0.3s ease;
+  }
+  
+  .like-btn:hover svg {
+    color: #ff4d4d; /* Hover effect for the heart */
+  }
+  
+  .back {
+    padding: 15px;
+  }
+  
+  .comment-btn {
+    margin-top: 10px;
+  }
+  
+
+  /* Aligning the bullet points */
+ul {
+    list-style-position: inside; /* Ensures the bullet stays inside the padding */
+    padding-left: 20px; /* Optional: Adds space between the bullets and the text */
+}
+
+li {
+    text-align: left; /* Align the text to the left */
+    margin-bottom: 8px; /* Add spacing between list items */
+}
