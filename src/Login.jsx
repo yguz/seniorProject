@@ -11,7 +11,16 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post("http://localhost:3000/api/users/login", { email, password });
-      setMessage(response.data.message);
+
+      const { userId, message: loginMessage } = response.data;
+
+      if (userId) {
+        // Store the userId in sessionStorage (or localStorage if you want it to persist after closing the browser)
+        sessionStorage.setItem("userId", userId);
+        setMessage(`Login successful! Welcome, User ID: ${userId}`);
+      } else {
+        setMessage("Login failed. No userId received.");
+      }
     } catch (error) {
       setMessage(error.response?.data?.error || "Failed to login");
     }
@@ -22,8 +31,20 @@ const Login = () => {
       <h2>Login</h2>
       {message && <p>{message}</p>}
       <form onSubmit={handleLogin}>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required />
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" required />
+        <input 
+          type="email" 
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)} 
+          placeholder="Enter your email" 
+          required 
+        />
+        <input 
+          type="password" 
+          value={password} 
+          onChange={(e) => setPassword(e.target.value)} 
+          placeholder="Enter your password" 
+          required 
+        />
         <button type="submit">Login</button>
       </form>
     </div>
