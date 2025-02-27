@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { FaHeart, FaRegHeart } from 'react-icons/fa'; // Import heart icons from react-icons
 import './assets/recipeCard.css';
 
 const RecipeCard = ({ recipe }) => {
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [price, setPrice] = useState(null); // State to store the price
+  const [liked, setLiked] = useState(false); // State to track if the recipe is liked
 
   const toggleCommentBox = () => {
     setShowCommentBox(!showCommentBox);
@@ -22,6 +24,11 @@ const RecipeCard = ({ recipe }) => {
   // Don't render anything if the price is 0 or unavailable
   if (price === null) return null;
 
+  // Handle toggling like status
+  const toggleLike = () => {
+    setLiked(!liked);
+  };
+
   return (
     <div className="recipe-box">
       <div className="front">
@@ -31,7 +38,22 @@ const RecipeCard = ({ recipe }) => {
         <p>{price !== null ? `$${price.toFixed(2)}` : 'Price unavailable'}</p>
       </div>
       <div className="back">
+                 {/* Heart toggle icon */}
+                 <div className="like-btn mb-5" onClick={toggleLike}>
+          {liked ? (
+            <FaHeart color="red" size={24} /> // Liked state
+          ) : (
+            <FaRegHeart color="grey" size={24} /> // Unliked state
+          )}
+        </div>
+        <div>
         <h3>{recipe.title}</h3>
+        </div>
+
+        <div>
+    
+        </div>
+       
         
         {/* Render ingredients by displaying their 'original' field */}
         <p><b>Ingredients:</b></p>
@@ -60,6 +82,8 @@ const RecipeCard = ({ recipe }) => {
             <button className="submit-comment">Submit</button>
           </div>
         )}
+        
+     
       </div>
     </div>
   );
