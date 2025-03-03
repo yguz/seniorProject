@@ -1,8 +1,10 @@
-import React, { useState } from "react";
-import axios from "axios";  
+import React, { useState, useContext } from "react";
+import axios from "axios";
 import './login.css';
+import { UserContext } from "./context/UserContext.jsx";
 
 const Login = () => {
+  const { setUser } = useContext(UserContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -11,15 +13,14 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post("http://localhost:3000/api/users/login", { email, password });
-
-      const { userId, message: loginMessage } = response.data;
-
+      const { userId, name, message: loginMessage } = response.data;
       if (userId) {
-        // Store the userId in sessionStorage (or localStorage if you want it to persist after closing the browser)
-        sessionStorage.setItem("userId", userId);
-        setMessage(`Login successful! Welcome, User ID: ${userId}`);
+        // Update the user context with a fallback for the name
+        setUser({ userId, name: name || "" });
+        const welcomeMsg = name ? `Login successful! Welcome, ${name}` : "Login successful! Welcome!";
+        setMessage(welcomeMsg);
       } else {
-        setMessage("Login failed. No userId received.");
+        setMessage("Login failed. No user information received.");
       }
     } catch (error) {
       setMessage(error.response?.data?.error || "Failed to login");

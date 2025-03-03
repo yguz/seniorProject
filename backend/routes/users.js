@@ -22,15 +22,14 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Email already in use' });
     }
 
-    // Hash password before storing
     const hashedPassword = await hashPassword(password);
     console.log("Hashed Password at Registration:", hashedPassword);
 
     const user = await User.create({
-      name: name || null, // Name is optional
+      name: name || null,
       email: encryptedEmail,
       password: hashedPassword,
-      dietaryPreferences: dietaryPreferences || null, // DietaryPreferences is optional
+      dietaryPreferences: dietaryPreferences || null,
     });
 
     res.status(201).json({ message: 'User registered successfully', userId: user.id });
@@ -61,7 +60,6 @@ router.post('/login', async (req, res) => {
     console.log("Stored Password in DB:", user.password);
     console.log("Plaintext Password:", password);
 
-    // Compare password
     const isValid = await comparePassword(password, user.password);
     console.log("Password Comparison Result:", isValid);
 
@@ -71,7 +69,7 @@ router.post('/login', async (req, res) => {
     }
 
     console.log("User authenticated successfully.");
-    res.status(200).json({ message: "Login successful", userId: user.id });
+    res.status(200).json({ message: "Login successful", userId: user.id, name: user.name });
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ error: 'Failed to login', details: error.message });

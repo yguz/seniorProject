@@ -11,11 +11,14 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Ensure Routes Are Registered Before Frontend
+// Register Routes
 const userRoutes = require('./routes/users');
 const recipeRoutes = require('./routes/recipes');
+const likesRoutes = require('./routes/likes');
+
 app.use('/api/users', userRoutes);
 app.use('/api/recipes', recipeRoutes);
+app.use('/api/likes', likesRoutes);
 
 // Debugging: Print Registered Routes
 app._router.stack.forEach((r) => {
@@ -40,15 +43,14 @@ sequelize
   .then(() => console.log('Database connected successfully...'))
   .catch((err) => console.error('Database connection failed:', err));
 
+// Force sync all tables (drop and recreate)
+// WARNING: This will delete all existing data!
 sequelize
-  .sync({ alter: true })
-  .then(() => console.log('Database synced...'))
+  .sync({ force: true })
+  .then(() => {
+    console.log('Database synced with force: true (all tables dropped and recreated)');
+    app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+  })
   .catch((err) => console.error('Database sync failed:', err));
 
-// Start Server
-if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
-}
-
-// Export for Testing
 module.exports = app;

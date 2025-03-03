@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link } from 'react-router-dom'; // Remove BrowserRouter here
+import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import './Navbar.css';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
@@ -13,22 +13,28 @@ import Login from './Login';
 import Register from './Register';
 import SearchResults from './SearchResults';
 import MealResults from './MealResults';
+import { UserContext } from './context/UserContext.jsx';
 
 const Navbar = () => {
   const [isNavCollapsed, setIsNavCollapsed] = useState(true);
+  const { user, setUser } = useContext(UserContext);
+  const loggedIn = !!user;
 
-  // Close navbar when a link is clicked (on mobile view)
   const handleLinkClick = () => {
     if (!isNavCollapsed) {
-      setIsNavCollapsed(true); // Collapse the navbar
+      setIsNavCollapsed(true);
     }
   };
 
-  // Effect to close the navbar when switching pages
+  const handleLogout = () => {
+    setUser(null);
+    window.location.href = "/login";
+  };
+
   useEffect(() => {
     const navbarCollapse = document.getElementById("navbarNav");
     if (navbarCollapse) {
-      navbarCollapse.classList.remove("show"); // Manually close navbar when changing routes
+      navbarCollapse.classList.remove("show");
     }
   }, []);
 
@@ -38,7 +44,6 @@ const Navbar = () => {
         <Link to="/" className="navbar-brand">
           <img src="src/assets/logo2.png" alt="Logo" className="navbar-logo" />
         </Link>
-
         <button
           className="navbar-toggler"
           type="button"
@@ -47,11 +52,10 @@ const Navbar = () => {
           aria-controls="navbarNav"
           aria-expanded={!isNavCollapsed ? "true" : "false"}
           aria-label="Toggle navigation"
-          onClick={() => setIsNavCollapsed(!isNavCollapsed)} // Toggle navbar state
+          onClick={() => setIsNavCollapsed(!isNavCollapsed)}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-
         <div className={`collapse navbar-collapse ${isNavCollapsed ? "" : "show"}`} id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
@@ -82,16 +86,20 @@ const Navbar = () => {
                 Contact Us
               </Link>
             </li>
-            <li className="nav-item">
-              <Link to="/login" className="nav-link" onClick={handleLinkClick}>
-                Login
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/register" className="nav-link" onClick={handleLinkClick}>
-                Register
-              </Link>
-            </li>
+            {loggedIn ? (
+              <li className="nav-item">
+                <button className="nav-link" onClick={handleLogout}>Logout</button>
+              </li>
+            ) : (
+              <>
+                <li className="nav-item">
+                  <Link to="/login" className="nav-link" onClick={handleLinkClick}>Login</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to="/register" className="nav-link" onClick={handleLinkClick}>Register</Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>
