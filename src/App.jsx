@@ -4,6 +4,7 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import Navbar from './Navbar'; // Import Navbar component
 import About from './About';
 import Home from './Home';
+import Dashboard from './Dashboard';
 import Contact from './Contact';
 import Login from './Login';
 import Register from './Register';
@@ -34,6 +35,7 @@ const App = () => {
               <Route path="/lunch" element={<MealResults mealType="lunch" />} />
               <Route path="/dinner" element={<MealResults mealType="dinner" />} />
               <Route path="/results" element={<SearchResults />} />
+              <Route path="/dashboard" element={<Dashboard />} />
             </Routes>
           </div>
         </CSSTransition>
