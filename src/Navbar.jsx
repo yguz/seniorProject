@@ -86,6 +86,13 @@ const Navbar = () => {
                 Contact Us
               </Link>
             </li>
+            {loggedIn && (
+              <li className="nav-item">
+                <Link to="/dashboard" className="nav-link" onClick={handleLinkClick}>
+                  Dashboard
+                </Link>
+              </li>
+            )}
             {loggedIn ? (
               <li className="nav-item">
                 <button className="nav-link" onClick={handleLogout}>Logout</button>
