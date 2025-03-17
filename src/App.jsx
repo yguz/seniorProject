@@ -10,6 +10,7 @@ import Login from './Login';
 import Register from './Register';
 import SearchResults from './SearchResults';
 import MealResults from './MealResults';
+import ProtectedRoute from './context/ProtectedRoute';
 import './App.css'; // Ensure you have a CSS file for transitions
 
 const App = () => {
@@ -35,7 +36,11 @@ const App = () => {
               <Route path="/lunch" element={<MealResults mealType="lunch" />} />
               <Route path="/dinner" element={<MealResults mealType="dinner" />} />
               <Route path="/results" element={<SearchResults />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
             </Routes>
           </div>
         </CSSTransition>

@@ -1,5 +1,5 @@
-import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import axios from "axios";
 import './login.css';
 import { UserContext } from "./context/UserContext.jsx";
@@ -9,7 +9,15 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const navigate = useNavigate(); // Initialize navigation
+  const navigate = useNavigate();
+  const location = useLocation(); // Get current location
+
+  // Check if user was redirected from a protected route
+  useEffect(() => {
+    if (location.state?.from) {
+      setMessage("Please log in to access this page");
+    }
+  }, [location]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -36,7 +44,7 @@ const Login = () => {
   return (
     <div className="login-form">
       <h2>Login</h2>
-      {message && <p>{message}</p>}
+      {message && <p className={message.includes("successful") ? "success-message" : "error-message"}>{message}</p>}
       <form onSubmit={handleLogin}>
         <input 
           type="email" 
@@ -54,6 +62,7 @@ const Login = () => {
         />
         <button type="submit">Login</button>
       </form>
+      <p>Don't have an account? <a href="/register">Register here</a></p>
     </div>
   );
 };
