@@ -15,6 +15,10 @@ app.use(express.json());
 const userRoutes = require('./routes/users');
 const recipeRoutes = require('./routes/recipes');
 const likesRoutes = require('./routes/likes');
+// Contact Route
+const contactRoutes = require('./routes/contact');
+app.use('/api/contact', contactRoutes);
+
 
 app.use('/api/users', userRoutes);
 app.use('/api/recipes', recipeRoutes);
@@ -26,6 +30,8 @@ app._router.stack.forEach((r) => {
     console.log(`Registered Route: ${r.route.path}`);
   }
 });
+
+
 
 // Serve Frontend Files (Only if in Production)
 if (process.env.NODE_ENV === 'production') {
@@ -43,12 +49,11 @@ sequelize
   .then(() => console.log('Database connected successfully...'))
   .catch((err) => console.error('Database connection failed:', err));
 
-// Force sync all tables (drop and recreate)
-// WARNING: This will delete all existing data!
+// Connect to database and initialize tables if they don't exist
 sequelize
-  .sync({ force: true })
+  .sync({ force: false })
   .then(() => {
-    console.log('Database synced with force: true (all tables dropped and recreated)');
+    console.log('Database synced (tables created if they don\'t exist)');
     app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
   })
   .catch((err) => console.error('Database sync failed:', err));
