@@ -1,27 +1,50 @@
 import React, { useState } from "react";
+import axios from "axios";
 import '/src/assets/contact.css';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    subject: "Contact Form Submission",
     message: "",
   });
+  const [status, setStatus] = useState({ type: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Message sent! We’ll get back to you as soon as we can!");
-    setFormData({ name: "", email: "", message: "" });
+    setIsSubmitting(true);
+    setStatus({ type: "", message: "" });
+    
+    try {
+      const response = await axios.post("http://localhost:3000/api/contact", formData);
+      setStatus({ type: "success", message: "Message sent successfully! We'll get back to you soon." });
+      setFormData({ name: "", email: "", subject: "Contact Form Submission", message: "" });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setStatus({ 
+        type: "error", 
+        message: error.response?.data?.error || "Failed to send message. Please try again later." 
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="contact-page-wrapper"> {/* Wrapper for centering */}
       <div className="contact-container">
         <h1 className="contact-title">Contact Us</h1>
+        {status.message && (
+          <div className={`alert ${status.type === "success" ? "alert-success" : "alert-error"}`}>
+            {status.message}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="contact-form">
           <input
             type="text"
@@ -49,8 +72,12 @@ const Contact = () => {
             required
             className="contact-textarea"
           ></textarea>
-          <button type="submit" className="contact-button">
-            Send
+          <button 
+            type="submit" 
+            className="contact-button"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Sending..." : "Send"}
           </button>
         </form>
       </div>

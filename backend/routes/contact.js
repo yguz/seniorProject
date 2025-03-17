@@ -13,9 +13,11 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  debug: true, // Show debug output
+  logger: true // Log information about the mail
 });
 
-// Verify transporter configuration
+// Verify transporter configuration on startup
 transporter.verify((error, success) => {
   if (error) {
     console.error("Error setting up email transporter:", error);
@@ -26,30 +28,57 @@ transporter.verify((error, success) => {
 
 // POST endpoint to handle contact form submissions
 router.post('/', async (req, res) => {
-  const { name, email, subject, message } = req.body;
-
-  // Validate required fields
-  if (!name || !email || !subject || !message) {
-    return res.status(400).json({ error: "Please provide name, email, subject, and message." });
-  }
-
-  // Configure email options
-  const mailOptions = {
-    from: `"${name}" <${email}>`, // sender address from the contact form
-    to: process.env.EMAIL_TO,      // your email address to receive messages
-    subject: subject,
-    text: message,
-    html: `<p>${message}</p>`,
-  };
-
   try {
+    const { name, email, subject, message } = req.body;
+    
+    console.log("Received contact form submission:", { name, email, subject });
+
+    // Validate required fields
+    if (!name || !email || !message) {
+      return res.status(400).json({ 
+        error: "Please provide name, email, and message." 
+      });
+    }
+
+    // Use a default subject if none provided
+    const emailSubject = subject || "New contact form submission";
+
+    // Configure email options
+    const mailOptions = {
+      from: process.env.EMAIL_USER, // Use the configured email as sender
+      replyTo: email, // Set reply-to to the user's email
+      to: process.env.EMAIL_TO,
+      subject: emailSubject,
+      text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+      html: `
+        <h3>New Contact Form Submission</h3>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+      `
+    };
+
+    console.log("Attempting to send email with options:", {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject
+    });
+
     // Send the email
     const info = await transporter.sendMail(mailOptions);
-    console.log("Message sent: %s", info.messageId);
-    res.status(200).json({ message: "Email sent successfully." });
+    console.log("Message sent successfully:", info.messageId);
+    
+    res.status(200).json({ 
+      success: true,
+      message: "Email sent successfully." 
+    });
   } catch (error) {
     console.error("Error sending email:", error);
-    res.status(500).json({ error: "Error sending email." });
+    res.status(500).json({ 
+      success: false,
+      error: "Error sending email. Please try again later." 
+    });
   }
 });
 
