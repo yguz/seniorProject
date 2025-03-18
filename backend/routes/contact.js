@@ -1,5 +1,6 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
+const logger = require('../utils/logger');
 require('dotenv').config();
 
 const router = express.Router();
@@ -13,16 +14,17 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  debug: true, // Show debug output
-  logger: true // Log information about the mail
+  debug: false, // Disable debug logging
+  logger: false, // Disable logger
+  silent: true // Completely silence all logs
 });
 
-// Verify transporter configuration on startup
-transporter.verify((error, success) => {
+// Verify transporter configuration on startup but don't log results
+transporter.verify(function(error, success) {
   if (error) {
-    console.error("Error setting up email transporter:", error);
+    logger.error("Email transporter error", error);
   } else {
-    console.log("Email transporter is ready");
+    logger.server("Email transporter configured successfully");
   }
 });
 
@@ -31,10 +33,9 @@ router.post('/', async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
     
-    console.log("Received contact form submission:", { name, email, subject });
-
     // Validate required fields
     if (!name || !email || !message) {
+      logger.info("Contact form submission missing required fields");
       return res.status(400).json({ 
         error: "Please provide name, email, and message." 
       });
@@ -59,22 +60,16 @@ router.post('/', async (req, res) => {
       `
     };
 
-    console.log("Attempting to send email with options:", {
-      from: mailOptions.from,
-      to: mailOptions.to,
-      subject: mailOptions.subject
-    });
-
     // Send the email
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Message sent successfully:", info.messageId);
+    await transporter.sendMail(mailOptions);
+    logger.server("Contact email sent successfully");
     
     res.status(200).json({ 
       success: true,
       message: "Email sent successfully." 
     });
   } catch (error) {
-    console.error("Error sending email:", error);
+    logger.error("Error sending contact email", error);
     res.status(500).json({ 
       success: false,
       error: "Error sending email. Please try again later." 

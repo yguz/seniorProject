@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const logger = require('./logger');
 
 const hashPassword = async (password) => {
   if (!password) {
@@ -7,17 +8,15 @@ const hashPassword = async (password) => {
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
-  console.log("Generated Hashed Password:", hashedPassword);
   return hashedPassword;
 };
 
 const comparePassword = async (plainPassword, hashedPassword) => {
   if (!plainPassword || !hashedPassword) {
-    console.log("Invalid password comparison inputs.");
+    logger.error("Invalid password comparison inputs - missing required parameters");
     return false;
   }
 
-  console.log("Comparing:", plainPassword, "with", hashedPassword);
   return await bcrypt.compare(plainPassword, hashedPassword);
 };
 
