@@ -8,6 +8,26 @@ const Dashboard = () => {
   const { user } = useContext(UserContext);
   const [likedRecipes, setLikedRecipes] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Function to handle unliking recipes from the dashboard
+  const handleUnlike = async (recipeId) => {
+    if (!user || !user.userId) return;
+    
+    try {
+      await axios.delete(`http://localhost:3000/api/likes/${recipeId}/${user.userId}`);
+      // Update the local state to remove the unliked recipe
+      setLikedRecipes(prevRecipes => prevRecipes.filter(recipe => recipe.recipeId !== recipeId));
+    } catch (error) {
+      console.error("Error unliking recipe:", error);
+      setErrorMessage(error.response?.data?.error || "Failed to unlike recipe");
+    }
+  };
+  
+  // Refresh the liked recipes when needed
+  const refreshLikedRecipes = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   useEffect(() => {
     if (!user || !user.userId) return;
@@ -30,7 +50,7 @@ const Dashboard = () => {
     };
 
     fetchLikedRecipes();
-  }, [user]);
+  }, [user, refreshTrigger]); // Added refreshTrigger to dependencies
 
   // Function to parse ingredients if they are stored as a JSON string
   const parseIngredients = (ingredients) => {
@@ -49,7 +69,13 @@ const Dashboard = () => {
       <div className="container">
         {likedRecipes.length > 0 ? (
           likedRecipes.map((recipe) => (
-            <RecipeCard key={recipe.recipeId} recipe={recipe} />
+            <RecipeCard 
+              key={`${recipe.recipeId}-${recipe.id}`} 
+              recipe={{...recipe, id: recipe.recipeId}} 
+              isDashboard={true}
+              onUnlike={handleUnlike}
+              refreshLikedRecipes={refreshLikedRecipes}
+            />
           ))
         ) : (
           <p>No liked recipes yet.</p>

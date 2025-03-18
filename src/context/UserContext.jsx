@@ -1,4 +1,5 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 export const UserContext = createContext({
   user: null,
@@ -16,6 +17,35 @@ export const UserProvider = ({ children }) => {
   const [likedRecipes, setLikedRecipes] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialUser); // Check if user is logged in
 
+  // Load liked recipes when user changes
+  useEffect(() => {
+    const fetchLikedRecipes = async () => {
+      if (user && user.userId) {
+        try {
+          const response = await axios.get(`http://localhost:3000/api/likes/${user.userId}`);
+          
+          // Process ingredients if needed
+          const formattedRecipes = response.data.likedRecipes.map(recipe => ({
+            ...recipe,
+            ingredients: typeof recipe.ingredients === 'string' 
+              ? JSON.parse(recipe.ingredients) 
+              : recipe.ingredients
+          }));
+          
+          setLikedRecipes(formattedRecipes);
+        } catch (error) {
+          console.error('Error fetching liked recipes:', error);
+          setLikedRecipes([]);
+        }
+      } else {
+        // Clear liked recipes when user logs out
+        setLikedRecipes([]);
+      }
+    };
+
+    fetchLikedRecipes();
+  }, [user]);
+
   const updateUser = (userData) => {
     setUser(userData);
     if (userData) {
@@ -24,6 +54,7 @@ export const UserProvider = ({ children }) => {
     } else {
       sessionStorage.removeItem("user");
       setIsAuthenticated(false); // Mark as not authenticated
+      setLikedRecipes([]); // Clear liked recipes on logout
     }
   };
 

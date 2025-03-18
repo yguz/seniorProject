@@ -45,4 +45,32 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
+// DELETE endpoint to unlike a recipe
+router.delete('/:recipeId/:userId', async (req, res) => {
+  try {
+    const { recipeId, userId } = req.params;
+    
+    if (!userId || !recipeId) {
+      return res.status(400).json({ error: "Missing required parameters: userId or recipeId" });
+    }
+    
+    const existingLike = await LikedRecipe.findOne({ 
+      where: { 
+        userId, 
+        recipeId 
+      } 
+    });
+    
+    if (!existingLike) {
+      return res.status(404).json({ error: "Like not found" });
+    }
+    
+    await existingLike.destroy();
+    res.status(200).json({ message: "Recipe unliked successfully" });
+  } catch (error) {
+    console.error("Error unliking recipe:", error);
+    res.status(500).json({ error: error.message || "Internal server error" });
+  }
+});
+
 module.exports = router;

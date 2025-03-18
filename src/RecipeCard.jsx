@@ -1,19 +1,31 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import axios from 'axios';
 import './assets/recipeCard.css';
 import { UserContext } from "./context/UserContext.jsx";
 
-const RecipeCard = ({ recipe }) => {
+const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes }) => {
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [price, setPrice] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [likeStatus, setLikeStatus] = useState('idle'); // 'idle', 'loading', 'success', 'error'
   const { user, likedRecipes, setLikedRecipes } = useContext(UserContext);
   const userId = user ? user.userId : null;
 
-  // Track local like state based on global likedRecipes
-  const [isLiked, setIsLiked] = useState(
-    likedRecipes.some(like => like.recipeId === recipe.id)
-  );
+  // Track local like state
+  const [isLiked, setIsLiked] = useState(false);
+  
+  // Check if recipe is already liked when component mounts
+  useEffect(() => {
+    // If in dashboard, recipe is already liked
+    if (isDashboard) {
+      setIsLiked(true);
+    } else {
+      // Check if recipe exists in likedRecipes from context
+      const alreadyLiked = likedRecipes.some(like => like.recipeId === recipe.id);
+      setIsLiked(alreadyLiked);
+    }
+  }, [isDashboard, likedRecipes, recipe.id]);
 
   const toggleCommentBox = () => {
     setShowCommentBox(!showCommentBox);
@@ -33,14 +45,17 @@ const RecipeCard = ({ recipe }) => {
 
   // Handle toggling like status
   const toggleLike = async () => {
-    console.log("toggleLike triggered. isLiked:", isLiked, "userId:", userId);
     if (!userId) {
       setErrorMessage('You need to be logged in to like a recipe');
       return;
     }
 
+    setLikeStatus('loading');
+    setErrorMessage('');
+
     try {
       if (!isLiked) {
+        // Like the recipe
         const payload = {
           recipeId: recipe.id,
           userId: userId,
@@ -50,38 +65,38 @@ const RecipeCard = ({ recipe }) => {
           ingredients: recipe.ingredients,
           instructions: recipe.instructions,
         };
-        console.log("Sending payload:", payload);
 
-        const response = await fetch('http://localhost:3000/api/likes', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-
-        if (response.ok) {
-          console.log('Recipe liked successfully');
-          setLikedRecipes([...likedRecipes, payload]); // Update global state
-          setIsLiked(true); // Update local like state
-        } else {
-          console.error('Failed to like recipe');
-          const errorText = await response.text();
-          console.error("Error response:", errorText);
+        const response = await axios.post('http://localhost:3000/api/likes', payload);
+        
+        if (response.status === 201) {
+          // Update global state only if we're not already in the dashboard
+          if (!isDashboard) {
+            setLikedRecipes(prev => [...prev, payload]);
+          }
+          setIsLiked(true);
+          setLikeStatus('success');
+          if (refreshLikedRecipes) refreshLikedRecipes();
         }
       } else {
-        const response = await fetch(`http://localhost:3000/api/likes/${recipe.id}/${userId}`, {
-          method: 'DELETE',
-        });
-
-        if (response.ok) {
-          console.log('Recipe unliked successfully');
-          setLikedRecipes(likedRecipes.filter(like => like.recipeId !== recipe.id)); // Update global state
-          setIsLiked(false); // Update local like state
-        } else {
-          console.error('Failed to unlike recipe');
+        // Unlike the recipe
+        const response = await axios.delete(`http://localhost:3000/api/likes/${recipe.id}/${userId}`);
+        
+        if (response.status === 200) {
+          if (isDashboard && onUnlike) {
+            // If we're in the dashboard, call the parent's onUnlike function
+            onUnlike(recipe.id);
+          } else {
+            // Otherwise just update the global state
+            setLikedRecipes(prev => prev.filter(like => like.recipeId !== recipe.id));
+          }
+          setIsLiked(false);
+          setLikeStatus('success');
         }
       }
     } catch (error) {
-      console.error('Error while toggling like:', error);
+      console.error('Error toggling like:', error);
+      setErrorMessage(error.response?.data?.error || 'Failed to update like status');
+      setLikeStatus('error');
     }
   };
 
@@ -100,6 +115,7 @@ const RecipeCard = ({ recipe }) => {
           ) : (
             <FaRegHeart color="grey" size={24} />
           )}
+          {likeStatus === 'loading' && <span className="loading-indicator"> ...</span>}
         </div>
         <div>
           <h3>{recipe.title}</h3>
