@@ -6,7 +6,7 @@ import './assets/searchResults.css';
 const SearchResults = () => {
   const [recipes, setRecipes] = useState([]);
   const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState(""); // New state to hold search input
+  const [searchQuery, setSearchQuery] = useState(""); // State to hold search input
   const [loading, setLoading] = useState(true);  // Track loading state
   const location = useLocation(); // Get the window location object (URL)
   const navigate = useNavigate(); // navigate back to search page if needed
@@ -23,6 +23,7 @@ const SearchResults = () => {
           throw new Error(`Server Error: ${response.status}`);
         }
         const data = await response.json();
+        console.log('Fetched recipes:', data.recipes); // Log fetched recipes
         setRecipes(data.recipes); // Access the 'recipes' array
         setError(null);
       } catch (err) {
@@ -37,22 +38,23 @@ const SearchResults = () => {
   // This function handles the search button click
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      navigate(`/results?search=${searchQuery}`);
+      navigate(`/results?search=${searchQuery}`); // Update the URL with search query
     }
   };
 
-  // Fetch recipes when the search query changes, but avoid double fetching
+  // Fetch recipes when the query changes or on initial load
   useEffect(() => {
-    // Skip fetching on initial render
-    if (firstRender.current) {
-      firstRender.current = false;
-      return; // Don't trigger fetch on initial load (since it comes from the Search component)
-    }
-
     if (query) {
-      fetchRecipes(query); // Fetch new recipes based on the query
+      fetchRecipes(query); // Fetch recipes based on the query from URL
     }
-  }, [query]); // Only depend on query, no need to track the input searchQuery
+  }, [query]); // This will trigger the fetch when the query changes
+
+  // Handle search input change
+  const handleInputChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  console.log('Recipes state:', recipes); // Log the current recipes state
 
   return (
     <div className="results-container">
@@ -64,7 +66,7 @@ const SearchResults = () => {
           className="search-input-results"
           placeholder="Search for more recipes..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleInputChange}  // Update state with input change
         />
         <button className="search-btn-results" onClick={handleSearch}>Search</button>
       </div>
@@ -72,7 +74,7 @@ const SearchResults = () => {
       {error && <p className="error">Error: {error}</p>}
 
       {/* Display loading spinner when loading */}
-      {loading && <div className="spinner"></div>} 
+      {loading && <div className="spinner"></div>}
 
       <div className="container">
         {recipes.length > 0 ? (

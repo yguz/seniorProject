@@ -18,6 +18,7 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
   
   // Check if recipe is already liked when component mounts
   useEffect(() => {
+    console.log('Recipe prop received in RecipeCard:', recipe); // Log the recipe prop
     // If in dashboard, recipe is already liked
     if (isDashboard) {
       setIsLiked(true);
@@ -42,7 +43,12 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
   }, [recipe]);
 
   // If the price is null, don't render the card
-  if (price === null) return null;
+  if (price === null) {
+    console.log('Price is null, not rendering the card.');
+    return null;
+  }
+
+  console.log('Recipe price:', price); // Log the price for debugging
 
   // Handle toggling like status
   const toggleLike = async () => {
@@ -134,7 +140,6 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
         
         {/* Link to see full recipe */}
         <Link to={`/recipe/${recipe.id}?price=${price}`} className="full-recipe-link">See full recipe for instructions</Link>
-
 
         <button className="comment-btn" onClick={toggleCommentBox}>
           Add Comment
