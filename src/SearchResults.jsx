@@ -5,9 +5,11 @@ import './assets/searchResults.css';
 
 const SearchResults = () => {
   const [recipes, setRecipes] = useState([]);
+  const [filteredRecipes, setFilteredRecipes] = useState([]); // Store filtered recipes after sorting
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); // State to hold search input
   const [loading, setLoading] = useState(true);  // Track loading state
+  const [priceSort, setPriceSort] = useState('lowToHigh'); // State for price sorting ('lowToHigh' or 'highToLow')
   const location = useLocation(); // Get the window location object (URL)
   const navigate = useNavigate(); // navigate back to search page if needed
 
@@ -25,10 +27,12 @@ const SearchResults = () => {
         const data = await response.json();
         console.log('Fetched recipes:', data.recipes); // Log fetched recipes
         setRecipes(data.recipes); // Access the 'recipes' array
+        setFilteredRecipes(data.recipes); // Initially, set filtered recipes to all fetched recipes
         setError(null);
       } catch (err) {
         setError(err.message);
         setRecipes([]);  // Clear the recipes in case of an error
+        setFilteredRecipes([]);  // Clear filtered recipes on error
       } finally {
         setLoading(false); // Set loading to false once the request is completed
       }
@@ -49,12 +53,27 @@ const SearchResults = () => {
     }
   }, [query]); // This will trigger the fetch when the query changes
 
-  // Handle search input change
-  const handleInputChange = (e) => {
-    setSearchQuery(e.target.value);
+  // Sort recipes based on price (Low to High or High to Low)
+  const sortRecipesByPrice = (sortOrder) => {
+    let sortedRecipes = [...recipes];
+    
+    if (sortOrder === 'lowToHigh') {
+      sortedRecipes.sort((a, b) => (a.price || 0) - (b.price || 0)); // Sorting by price ascending
+    } else if (sortOrder === 'highToLow') {
+      sortedRecipes.sort((a, b) => (b.price || 0) - (a.price || 0)); // Sorting by price descending
+    }
+
+    setFilteredRecipes(sortedRecipes); // Update the filteredRecipes state
   };
 
-  console.log('Recipes state:', recipes); // Log the current recipes state
+  // Handle price sorting change
+  const handlePriceSortChange = (e) => {
+    const selectedSortOrder = e.target.value;
+    setPriceSort(selectedSortOrder); // Update state with the selected sorting option
+    sortRecipesByPrice(selectedSortOrder); // Sort the recipes based on the selected option
+  };
+
+  console.log('Filtered recipes after price sort:', filteredRecipes); // Log the filtered recipes after sorting
 
   return (
     <div className="results-container">
@@ -66,9 +85,18 @@ const SearchResults = () => {
           className="search-input-results"
           placeholder="Search for more recipes..."
           value={searchQuery}
-          onChange={handleInputChange}  // Update state with input change
+          onChange={(e) => setSearchQuery(e.target.value)}  // Update state with input change
         />
         <button className="search-btn-results" onClick={handleSearch}>Search</button>
+      </div>
+
+      {/* Price sorting dropdown */}
+      <div className="sort-by-price-container">
+        <label>Sort by Price:</label>
+        <select value={priceSort} onChange={handlePriceSortChange}>
+          <option value="lowToHigh">Price: Low to High</option>
+          <option value="highToLow">Price: High to Low</option>
+        </select>
       </div>
 
       {error && <p className="error">Error: {error}</p>}
@@ -77,8 +105,8 @@ const SearchResults = () => {
       {loading && <div className="spinner"></div>}
 
       <div className="container">
-        {recipes.length > 0 ? (
-          recipes.map((recipe) => (
+        {filteredRecipes.length > 0 ? (
+          filteredRecipes.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))
         ) : (
