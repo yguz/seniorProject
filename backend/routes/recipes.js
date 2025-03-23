@@ -315,6 +315,32 @@ router.get('/search/:mealType', async (req, res) => {
   }
 });
 
+// Route to get recipe details
+router.get('/recipe/:id', async (req, res) => {
+  const { id } = req.params;
+  const { price } = req.query;  // Get price from the query string
+
+  console.log('Fetching recipe details for ID:', id);
+  console.log('Price received:', price);  // Check if the price is received
+
+  try {
+    // Make the request to the Spoonacular API using Axios
+    const response = await axios.get(`https://api.spoonacular.com/recipes/${id}/information`, {
+      params: { apiKey: API_KEY }
+    });
+
+    const recipeData = {
+      ...response.data,
+      price: price || null,  // Add price to the returned data if available
+    };
+
+    res.json(recipeData);  // Send back the recipe details along with price
+  } catch (error) {
+    console.error('Error fetching recipe details:', error);
+    res.status(500).json({ error: 'Failed to fetch recipe details' });
+  }
+});
+
 
 
 module.exports = router;

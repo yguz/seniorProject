@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import axios from 'axios';
+import { Link } from 'react-router-dom'; // Add this import for navigation
 import './assets/recipeCard.css';
 import { UserContext } from "./context/UserContext.jsx";
 
@@ -130,9 +131,11 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
             <li>No ingredients available.</li>
           )}
         </ul>
-        <p>
-          <b>Instructions:</b> {recipe.instructions ? recipe.instructions : "No instructions available."}
-        </p>
+        
+        {/* Link to see full recipe */}
+        <Link to={`/recipe/${recipe.id}?price=${price}`} className="full-recipe-link">See full recipe for instructions</Link>
+
+
         <button className="comment-btn" onClick={toggleCommentBox}>
           Add Comment
         </button>
