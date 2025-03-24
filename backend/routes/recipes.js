@@ -12,6 +12,8 @@ const SPOONACULAR_RECIPE_URL = 'https://api.spoonacular.com/recipes';
 // Gemini API URL to fetch ingredient prices
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + process.env.GEMINI_API_KEY;
 
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 // Helper function to prepare ingredients for Gemini API
 const prepareIngredientsForGemini = (usedIngredients, missedIngredients) => {
   const allIngredients = [];
@@ -31,8 +33,8 @@ const prepareIngredientsForGemini = (usedIngredients, missedIngredients) => {
   return allIngredients;
 };
 
-// Helper function to get the total price for a list of ingredients using the Gemini API
-const getIngredientsPrice = async (usedIngredients, missedIngredients) => {
+// Helper function to get the total price for a list of ingredients using the Gemini API with rate limiting
+const getIngredientsPrice = async (usedIngredients, missedIngredients, retryCount = 0) => {
   console.log('Used Ingredients: ', usedIngredients);
   console.log('Missed Ingredients: ', missedIngredients);
   
@@ -40,6 +42,9 @@ const getIngredientsPrice = async (usedIngredients, missedIngredients) => {
   let totalPrice = 0;
 
   try {
+    // Add a delay before each API call to prevent hitting the rate limit
+    await delay(2000); // Add a 5-second delay between requests (adjust as needed)
+
     // Construct the request to estimate the price of the ingredient
     const requestBody = {
       contents: [
@@ -64,20 +69,16 @@ const getIngredientsPrice = async (usedIngredients, missedIngredients) => {
     if (response.data && response.data.candidates && response.data.candidates.length > 0) {
       const priceText = response.data.candidates[0]?.content?.parts[0]?.text || '';
 
-      // Log the priceText to see the full explanation
       console.log('Extracted price text: ', priceText);
 
-      // Extract the "Total Estimated Price" range (e.g., "$13 - $28") from the text
       const totalPriceRangeMatch = priceText.match(/\*\*Total Estimated Price:\*\*\s*\$(\d+(?:\.\d+)?)\s*-\s*\$(\d+(?:\.\d+)?)/);
 
       if (totalPriceRangeMatch) {
-        // If a range is found, calculate the average
         const minPrice = parseFloat(totalPriceRangeMatch[1]);
         const maxPrice = parseFloat(totalPriceRangeMatch[2]);
         totalPrice = (minPrice + maxPrice) / 2;
         console.log('Total Price Range found: ', minPrice, maxPrice, 'Average Price: ', totalPrice);
       } else {
-        // If no total price range is found, fallback to a default price of $0
         console.log('No total price range found in text.');
         totalPrice = 0;
       }
@@ -87,7 +88,14 @@ const getIngredientsPrice = async (usedIngredients, missedIngredients) => {
 
     console.log('Total Price: ', totalPrice);
   } catch (error) {
-    console.error(`Error fetching price for ingredients ${ingredientList}:`, error);
+    if (error.response && error.response.status === 429 && retryCount < 3) { // Retry up to 3 times
+      console.log(`Rate limit exceeded. Retrying after ${2000 * (retryCount + 1)}ms.`);
+      await delay(2000 * (retryCount + 1));
+      return getIngredientsPrice(usedIngredients, missedIngredients, retryCount + 1); // Retry with exponential backoff
+    } else {
+      console.error(`Error fetching price for ingredients ${ingredientList}:`, error);
+      return 0; // Return 0 if retries fail or other error occurs
+    }
   }
 
   return totalPrice;
@@ -106,7 +114,7 @@ router.get('/search', async (req, res) => {
 
     // Request parameters: ingredients and number (to limit the number of recipes returned)
     const response = await axios.get(SPOONACULAR_URL, {
-      params: { ingredients: ingredients.join(','), number: 10 } // Adjust number as needed
+      params: { ingredients: ingredients.join(','), number: 8 } // Adjust number as needed
     });
 
     if (!response.data || response.data.length === 0) {
@@ -160,8 +168,8 @@ const prepareIngredientsForGeminiMealType = (usedIngredients) => {
   });
 };
 
-// Helper function to get the total price for a list of ingredients using the Gemini API
-const getIngredientsPriceMealType = async (usedIngredients) => {
+// Helper function to get the total price for a list of ingredients using the Gemini API with rate limiting
+const getIngredientsPriceMealType = async (usedIngredients, retryCount = 0) => {
   console.log('Used Ingredients: ', usedIngredients);
   
   // Prepare the ingredients for the Gemini API request

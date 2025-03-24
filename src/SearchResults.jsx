@@ -73,7 +73,7 @@ const SearchResults = () => {
         <input
           type="text"
           className="search-input-results"
-          placeholder="Search for more recipes..."
+          placeholder="Type a new ingredient for a new recipe..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />

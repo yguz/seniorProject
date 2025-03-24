@@ -20,7 +20,7 @@ const Search = () => {
         <div className="search-input-container">
           <input
             type="text"
-            placeholder="Type to search"
+            placeholder="Type an ingredient to search"
             className="search-input"
             value={query}
             onChange={(e) => setQuery(e.target.value)}  // Update query state on input change

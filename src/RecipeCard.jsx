@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './assets/recipeCard.css';
 import { UserContext } from "./context/UserContext.jsx";
 
@@ -15,7 +15,15 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
 
   // Track local like state
   const [isLiked, setIsLiked] = useState(false);
+
+  // Use location to get query params
+  const location = useLocation();
   
+  // Use memoization to store price and avoid re-calculating it unnecessarily
+  const displayedPrice = useMemo(() => {
+    return price ? `$${price.toFixed(2)}` : null; // Return null when price is unavailable
+  }, [price]);
+
   // Check if recipe is already liked when component mounts
   useEffect(() => {
     console.log('Recipe prop received in RecipeCard:', recipe); // Log the recipe prop
@@ -42,14 +50,15 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
     }
   }, [recipe]);
 
-  // Display message if price is null or invalid
-  const displayPrice = price ? `$${price.toFixed(2)}` : 'Price unavailable';
-
   // Handle toggling like status
   const toggleLike = async () => {
     if (!userId) {
       setErrorMessage('You need to be logged in to like a recipe');
       return;
+    }
+
+    if (likeStatus === 'loading') {
+      return; // Prevent multiple calls if already loading
     }
 
     setLikeStatus('loading');
@@ -102,12 +111,17 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
     }
   };
 
+  // Don't render the card if price is unavailable
+  if (!price || price <= 0) {
+    return null; // Prevent rendering the recipe card if price is invalid or not available
+  }
+
   return (
     <div className="recipe-box">
       <div className="front">
         <img src={recipe.image} alt={recipe.title} />
         <h3>{recipe.title}</h3>
-        <p>{displayPrice}</p> {/* Use the displayPrice instead of directly checking price */}
+        <p>{displayedPrice}</p> {/* Use the memoized displayed price */}
       </div>
       <div className="back">
         {errorMessage && <div className="error-message">{errorMessage}</div>}
