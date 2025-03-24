@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import axios from 'axios';
-import { Link } from 'react-router-dom'; // Add this import for navigation
+import { Link } from 'react-router-dom';
 import './assets/recipeCard.css';
 import { UserContext } from "./context/UserContext.jsx";
 
@@ -42,13 +42,8 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
     }
   }, [recipe]);
 
-  // If the price is null, don't render the card
-  if (price === null) {
-    console.log('Price is null, not rendering the card.');
-    return null;
-  }
-
-  console.log('Recipe price:', price); // Log the price for debugging
+  // Display message if price is null or invalid
+  const displayPrice = price ? `$${price.toFixed(2)}` : 'Price unavailable';
 
   // Handle toggling like status
   const toggleLike = async () => {
@@ -112,7 +107,7 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
       <div className="front">
         <img src={recipe.image} alt={recipe.title} />
         <h3>{recipe.title}</h3>
-        <p>{price !== null ? `$${price.toFixed(2)}` : 'Price unavailable'}</p>
+        <p>{displayPrice}</p> {/* Use the displayPrice instead of directly checking price */}
       </div>
       <div className="back">
         {errorMessage && <div className="error-message">{errorMessage}</div>}

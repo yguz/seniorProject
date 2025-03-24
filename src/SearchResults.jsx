@@ -5,75 +5,65 @@ import './assets/searchResults.css';
 
 const SearchResults = () => {
   const [recipes, setRecipes] = useState([]);
-  const [filteredRecipes, setFilteredRecipes] = useState([]); // Store filtered recipes after sorting
+  const [filteredRecipes, setFilteredRecipes] = useState([]);
   const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState(""); // State to hold search input
-  const [loading, setLoading] = useState(true);  // Track loading state
-  const [priceSort, setPriceSort] = useState('lowToHigh'); // State for price sorting ('lowToHigh' or 'highToLow')
-  const location = useLocation(); // Get the window location object (URL)
-  const navigate = useNavigate(); // navigate back to search page if needed
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [priceSort, setPriceSort] = useState('lowToHigh');
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const query = new URLSearchParams(location.search).get('search'); // Get query from URL
-  const firstRender = useRef(true); // Ref to track the initial render
+  const query = new URLSearchParams(location.search).get('search');
+  const firstRender = useRef(true);
+  const [hasFetched, setHasFetched] = useState(false);  // Track if fetch has been made
 
   const fetchRecipes = async (query) => {
-    if (query) {
-      setLoading(true); // Set loading to true before making the request
+    if (query && !hasFetched) {  // Check if we have not fetched yet
+      setLoading(true);
+      setHasFetched(true); // Set the flag to true after fetching
       try {
         const response = await fetch(`http://localhost:3000/api/recipes/search?ingredients=${query}`);
         if (!response.ok) {
           throw new Error(`Server Error: ${response.status}`);
         }
         const data = await response.json();
-        console.log('Fetched recipes:', data.recipes); // Log fetched recipes
-        setRecipes(data.recipes); // Access the 'recipes' array
-        setFilteredRecipes(data.recipes); // Initially, set filtered recipes to all fetched recipes
+        console.log('Fetched recipes:', data.recipes);
+        setRecipes(data.recipes);
+        setFilteredRecipes(data.recipes);
         setError(null);
       } catch (err) {
         setError(err.message);
-        setRecipes([]);  // Clear the recipes in case of an error
-        setFilteredRecipes([]);  // Clear filtered recipes on error
+        setRecipes([]);
+        setFilteredRecipes([]);
       } finally {
-        setLoading(false); // Set loading to false once the request is completed
+        setLoading(false);
       }
     }
   };
 
-  // This function handles the search button click
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      navigate(`/results?search=${searchQuery}`); // Update the URL with search query
-    }
-  };
-
-  // Fetch recipes when the query changes or on initial load
   useEffect(() => {
-    if (query) {
-      fetchRecipes(query); // Fetch recipes based on the query from URL
+    if (query && firstRender.current) {
+      firstRender.current = false; // Prevent initial call when page loads
+      fetchRecipes(query);
     }
-  }, [query]); // This will trigger the fetch when the query changes
+  }, [query]); // Fetch only when `query` changes
 
-  // Sort recipes based on price (Low to High or High to Low)
+  // Sort recipes
   const sortRecipesByPrice = (sortOrder) => {
     let sortedRecipes = [...recipes];
-    
     if (sortOrder === 'lowToHigh') {
-      sortedRecipes.sort((a, b) => (a.price || 0) - (b.price || 0)); // Sorting by price ascending
+      sortedRecipes.sort((a, b) => (a.price || 0) - (b.price || 0));
     } else if (sortOrder === 'highToLow') {
-      sortedRecipes.sort((a, b) => (b.price || 0) - (a.price || 0)); // Sorting by price descending
+      sortedRecipes.sort((a, b) => (b.price || 0) - (a.price || 0));
     }
-
-    setFilteredRecipes(sortedRecipes); // Update the filteredRecipes state
+    setFilteredRecipes(sortedRecipes);
   };
 
-  // Handle price sorting change
   const handlePriceSortChange = (e) => {
     const selectedSortOrder = e.target.value;
-    setPriceSort(selectedSortOrder); // Update state with the selected sorting option
-    sortRecipesByPrice(selectedSortOrder); // Sort the recipes based on the selected option
+    setPriceSort(selectedSortOrder);
+    sortRecipesByPrice(selectedSortOrder);
   };
-
-  console.log('Filtered recipes after price sort:', filteredRecipes); // Log the filtered recipes after sorting
 
   return (
     <div className="results-container">
@@ -85,12 +75,11 @@ const SearchResults = () => {
           className="search-input-results"
           placeholder="Search for more recipes..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}  // Update state with input change
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <button className="search-btn-results" onClick={handleSearch}>Search</button>
+        <button className="search-btn-results" onClick={() => navigate(`/results?search=${searchQuery}`)}>Search</button>
       </div>
 
-      {/* Price sorting dropdown */}
       <div className="sort-by-price-container">
         <label>Sort by Price:</label>
         <select value={priceSort} onChange={handlePriceSortChange}>
@@ -101,7 +90,6 @@ const SearchResults = () => {
 
       {error && <p className="error">Error: {error}</p>}
 
-      {/* Display loading spinner when loading */}
       {loading && <div className="spinner"></div>}
 
       <div className="container">
@@ -110,7 +98,7 @@ const SearchResults = () => {
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))
         ) : (
-          !loading && <p>No recipes found.</p>  // Display message if no recipes and not loading
+          !loading && <p>No recipes found.</p>
         )}
       </div>
     </div>

@@ -7,7 +7,7 @@ const Search = () => {
   const navigate = useNavigate();  // navigate to the results page
 
   const handleSearch = () => {
-    if (query) {
+    if (query.trim()) {
       // go to the results page with the query as a URL parameter
       navigate(`/results?search=${query}`);
     }
@@ -23,7 +23,7 @@ const Search = () => {
             placeholder="Type to search"
             className="search-input"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => setQuery(e.target.value)}  // Update query state on input change
           />
           <button className="search-btn" onClick={handleSearch}>Search</button>
         </div>
