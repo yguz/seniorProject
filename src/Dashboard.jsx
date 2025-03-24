@@ -5,7 +5,7 @@ import RecipeCard from "./RecipeCard.jsx";
 import './assets/searchResults.css'; // Import the shared CSS
 
 const Dashboard = () => {
-  const { user } = useContext(UserContext);
+  const { user, likedRecipes: contextLikedRecipes, setLikedRecipes: setContextLikedRecipes } = useContext(UserContext);
   const [likedRecipes, setLikedRecipes] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -16,8 +16,13 @@ const Dashboard = () => {
     
     try {
       await axios.delete(`http://localhost:3000/api/likes/${recipeId}/${user.userId}`);
+      
       // Update the local state to remove the unliked recipe
       setLikedRecipes(prevRecipes => prevRecipes.filter(recipe => recipe.recipeId !== recipeId));
+      
+      // Update the global state in UserContext
+      setContextLikedRecipes(prevRecipes => prevRecipes.filter(recipe => recipe.recipeId !== recipeId));
+      
     } catch (error) {
       console.error("Error unliking recipe:", error);
       setErrorMessage(error.response?.data?.error || "Failed to unlike recipe");
