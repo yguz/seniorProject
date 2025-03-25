@@ -15,11 +15,10 @@
 
 /* Navbar brand logo */
 .navbar-brand {
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: bold;
   color: #333;
   text-align: center;
-  margin-left: 1.5rem;
 }
 
 /* Logo styling */
@@ -301,34 +300,4 @@ body {
     font-size: 1.2rem; /* Slightly larger font size for desktop */
   }
 }
-
-/* Dropdown menu styles */
-.navbar-nav .nav-link:hover {
-  color: #ff6600; /* Change text color on hover */
-}
-
-/* Animation bar for navbar links (NOT the dropdown items) */
-.navbar-nav .nav-link .hover-bar {
-  position: absolute;
-  left: 50%;
-  bottom: -4px;
-  width: 0;
-  height: 3px;
-  background-color: #ff6600;
-  transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
-}
-
-.navbar-nav .nav-link:hover .hover-bar {
-  width: 100%;
-  left: 0;
-}
-
-/* Color change effect on hover (No underline, no background) */
-.dropdown-menu .dropdown-item:hover {
-  color: #ff6600 !important;
-  background: none !important;
-}
-
-
-
 

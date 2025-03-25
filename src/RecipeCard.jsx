@@ -1,23 +1,32 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import axios from 'axios';
+import { Link, useLocation } from 'react-router-dom';
 import './assets/recipeCard.css';
 import { UserContext } from "./context/UserContext.jsx";
 
 const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes }) => {
+  const [showCommentBox, setShowCommentBox] = useState(false);
   const [price, setPrice] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [likeStatus, setLikeStatus] = useState('idle'); // 'idle', 'loading', 'success', 'error'
-  const [isRemoving, setIsRemoving] = useState(false);
   const { user, likedRecipes, setLikedRecipes } = useContext(UserContext);
   const userId = user ? user.userId : null;
-  const cardRef = useRef(null);
 
   // Track local like state
   const [isLiked, setIsLiked] = useState(false);
+
+  // Use location to get query params
+  const location = useLocation();
   
+  // Use memoization to store price and avoid re-calculating it unnecessarily
+  const displayedPrice = useMemo(() => {
+    return price ? `$${price.toFixed(2)}` : null; // Return null when price is unavailable
+  }, [price]);
+
   // Check if recipe is already liked when component mounts
   useEffect(() => {
+    console.log('Recipe prop received in RecipeCard:', recipe); // Log the recipe prop
     // If in dashboard, recipe is already liked
     if (isDashboard) {
       setIsLiked(true);
@@ -28,6 +37,10 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
     }
   }, [isDashboard, likedRecipes, recipe.id]);
 
+  const toggleCommentBox = () => {
+    setShowCommentBox(!showCommentBox);
+  };
+
   // Set the price when the recipe is first loaded
   useEffect(() => {
     if (recipe.price && !isNaN(recipe.price) && recipe.price > 0) {
@@ -37,14 +50,15 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
     }
   }, [recipe]);
 
-  // If the price is null, don't render the card
-  if (price === null) return null;
-
   // Handle toggling like status
   const toggleLike = async () => {
     if (!userId) {
       setErrorMessage('You need to be logged in to like a recipe');
       return;
+    }
+
+    if (likeStatus === 'loading') {
+      return; // Prevent multiple calls if already loading
     }
 
     setLikeStatus('loading');
@@ -75,49 +89,19 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
           if (refreshLikedRecipes) refreshLikedRecipes();
         }
       } else {
-        // Unlike the recipe with animation
-        if (isDashboard) {
-          // Add removing class for animation
-          setIsRemoving(true);
-          
-          // Wait for animation to complete before actually removing
-          setTimeout(async () => {
-            try {
-              const response = await axios.delete(`http://localhost:3000/api/likes/${recipe.id}/${userId}`);
-              
-              if (response.status === 200) {
-                if (isDashboard && onUnlike) {
-                  // If we're in the dashboard, call the parent's onUnlike function
-                  onUnlike(recipe.id);
-                } else {
-                  // Otherwise just update the global state
-                  setLikedRecipes(prev => prev.filter(like => like.recipeId !== recipe.id));
-                }
-                setIsLiked(false);
-                setLikeStatus('success');
-                
-                // Always call refreshLikedRecipes if it exists
-                if (refreshLikedRecipes) refreshLikedRecipes();
-              }
-            } catch (error) {
-              console.error('Error unliking recipe:', error);
-              setErrorMessage(error.response?.data?.error || 'Failed to unlike recipe');
-              setLikeStatus('error');
-              setIsRemoving(false); // Reset the removing state if there's an error
-            }
-          }, 300); // Match this timing with the CSS transition duration
-        } else {
-          // Regular unlike without animation for non-dashboard views
-          const response = await axios.delete(`http://localhost:3000/api/likes/${recipe.id}/${userId}`);
-          
-          if (response.status === 200) {
+        // Unlike the recipe
+        const response = await axios.delete(`http://localhost:3000/api/likes/${recipe.id}/${userId}`);
+        
+        if (response.status === 200) {
+          if (isDashboard && onUnlike) {
+            // If we're in the dashboard, call the parent's onUnlike function
+            onUnlike(recipe.id);
+          } else {
+            // Otherwise just update the global state
             setLikedRecipes(prev => prev.filter(like => like.recipeId !== recipe.id));
-            setIsLiked(false);
-            setLikeStatus('success');
-            
-            // Always call refreshLikedRecipes if it exists
-            if (refreshLikedRecipes) refreshLikedRecipes();
           }
+          setIsLiked(false);
+          setLikeStatus('success');
         }
       }
     } catch (error) {
@@ -127,24 +111,27 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
     }
   };
 
+  // Don't render the card if price is unavailable
+  if (!price || price <= 0) {
+    return null; // Prevent rendering the recipe card if price is invalid or not available
+  }
+
   return (
-    <div className={`recipe-box ${isRemoving ? 'removing' : ''}`} ref={cardRef}>
+    <div className="recipe-box">
       <div className="front">
         <img src={recipe.image} alt={recipe.title} />
         <h3>{recipe.title}</h3>
-        <p>{price !== null ? `$${price.toFixed(2)}` : 'Price unavailable'}</p>
+        <p>{displayedPrice}</p> {/* Use the memoized displayed price */}
       </div>
       <div className="back">
         {errorMessage && <div className="error-message">{errorMessage}</div>}
-        <div className="action-buttons">
-          <div className="like-btn" onClick={toggleLike}>
-            {isLiked ? (
-              <FaHeart color="red" size={24} className={likeStatus === 'success' ? 'active' : ''} />
-            ) : (
-              <FaRegHeart color="grey" size={24} />
-            )}
-            {likeStatus === 'loading' && <span className="loading-indicator"> ...</span>}
-          </div>
+        <div className="like-btn" onClick={toggleLike}>
+          {isLiked ? (
+            <FaHeart color="red" size={24} />
+          ) : (
+            <FaRegHeart color="grey" size={24} />
+          )}
+          {likeStatus === 'loading' && <span className="loading-indicator"> ...</span>}
         </div>
         <div>
           <h3>{recipe.title}</h3>
@@ -159,9 +146,19 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
             <li>No ingredients available.</li>
           )}
         </ul>
-        <p>
-          <b>Instructions:</b> {recipe.instructions ? recipe.instructions : "No instructions available."}
-        </p>
+        
+        {/* Link to see full recipe */}
+        <Link to={`/recipe/${recipe.id}?price=${price}`} className="full-recipe-link">See full recipe for instructions</Link>
+
+        <button className="comment-btn" onClick={toggleCommentBox}>
+          Add Comment
+        </button>
+        {showCommentBox && (
+          <div className="comment-box active">
+            <textarea placeholder="Enter your comment here..."></textarea>
+            <button className="submit-comment">Submit</button>
+          </div>
+        )}
       </div>
     </div>
   );
