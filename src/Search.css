@@ -18,7 +18,7 @@
   white-space: nowrap;
   border-right: 4px solid #333;  /* Cursor effect */
   width: 0;
-  animation: typing 4s steps(40) 1s forwards, blink 0.75s step-end infinite, stopBlink 4s forwards;
+  animation: typing 3s steps(40) 1s forwards, blink 0.75s step-end infinite, stopBlink 2s forwards;
 }
 
 @keyframes typing {
@@ -45,7 +45,7 @@
 .search-card {
   width: 60%;
   height: 60vh;
-  background-image: url('https://img.freepik.com/free-photo/flat-lay-composition-mexican-food-with-copyspace_23-2148140317.jpg?t=st=1738107210~exp=1738110810~hmac=76fd9051631dae9f10db812f2d66da3f97f74534df8177ed5e275ef3cf3520fb&w=1480'); /* Food image */
+  background-image: url('https://assets.onecompiler.app/43757a92k/437575bgx/tomatoat.png'); /* Food image */
   background-size: cover;
   background-position: center;
   border-radius: 15px;

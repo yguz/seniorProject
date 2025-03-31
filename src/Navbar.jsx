@@ -1,48 +1,39 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-import About from './About';
-import Home from './Home';
-import Contact from './Contact';
-import Login from './Login';
-import Register from './Register';
-import SearchResults from './SearchResults';
-import MealResults from './MealResults';
 import { UserContext } from './context/UserContext.jsx';
+import logo from './assets/logo2.png';
 
 const Navbar = () => {
   const [isNavCollapsed, setIsNavCollapsed] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, setUser } = useContext(UserContext);
   const loggedIn = !!user;
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setIsNavCollapsed(true);
+  }, [location.pathname]);
 
   const handleLinkClick = () => {
-    if (!isNavCollapsed) {
-      setIsNavCollapsed(true);
-    }
+    setIsNavCollapsed(true);
   };
 
   const handleLogout = () => {
     setUser(null);
-    window.location.href = "/login";
+    navigate('/login');
   };
-
-  useEffect(() => {
-    const navbarCollapse = document.getElementById("navbarNav");
-    if (navbarCollapse) {
-      navbarCollapse.classList.remove("show");
-    }
-  }, []);
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-beige">
       <div className="container-fluid">
         <Link to="/" className="navbar-brand">
-          <img src="src/assets/logo2.png" alt="Logo" className="navbar-logo" />
+          <img src={logo} alt="Logo" className="navbar-logo" />
         </Link>
         <button
           className="navbar-toggler"
@@ -56,54 +47,65 @@ const Navbar = () => {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className={`collapse navbar-collapse ${isNavCollapsed ? "" : "show"}`} id="navbarNav">
+        <div className={`collapse navbar-collapse ${isNavCollapsed ? '' : 'show'}`} id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <Link to="/" className="nav-link" onClick={handleLinkClick}>
-                Home
+              <Link to="/" className="nav-link animated-link" onClick={handleLinkClick}>
+                Home <span className="hover-bar"></span>
+              </Link>
+            </li>
+            <li className="nav-item dropdown-container">
+              <Dropdown show={dropdownOpen} onToggle={() => setDropdownOpen(!dropdownOpen)}>
+                <Dropdown.Toggle as="a" className="nav-link">
+                  Meals
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item as={Link} to="/breakfast" onClick={() => setDropdownOpen(false)}>
+                    Breakfast
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/lunch" onClick={() => setDropdownOpen(false)}>
+                    Lunch
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/dinner" onClick={() => setDropdownOpen(false)}>
+                    Dinner
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </li>
+            <li className="nav-item">
+              <Link to="/about" className="nav-link animated-link" onClick={handleLinkClick}>
+                About Us <span className="hover-bar"></span>
               </Link>
             </li>
             <li className="nav-item">
-              <DropdownButton id="dropdown" title="Meals" className="nav-link">
-                <Dropdown.Item as={Link} to="/breakfast" onClick={handleLinkClick}>
-                  Breakfast
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/lunch" onClick={handleLinkClick}>
-                  Lunch
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/dinner" onClick={handleLinkClick}>
-                  Dinner
-                </Dropdown.Item>
-              </DropdownButton>
-            </li>
-            <li className="nav-item">
-              <Link to="/about" className="nav-link" onClick={handleLinkClick}>
-                About Us
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/contact" className="nav-link" onClick={handleLinkClick}>
-                Contact Us
+              <Link to="/contact" className="nav-link animated-link" onClick={handleLinkClick}>
+                Contact Us <span className="hover-bar"></span>
               </Link>
             </li>
             {loggedIn && (
               <li className="nav-item">
-                <Link to="/dashboard" className="nav-link" onClick={handleLinkClick}>
-                  Dashboard
+                <Link to="/dashboard" className="nav-link animated-link" onClick={handleLinkClick}>
+                  Dashboard <span className="hover-bar"></span>
                 </Link>
               </li>
             )}
             {loggedIn ? (
               <li className="nav-item">
-                <button className="nav-link" onClick={handleLogout}>Logout</button>
+                <button className="nav-link animated-link" onClick={handleLogout}>
+                  Logout <span className="hover-bar"></span>
+                </button>
               </li>
             ) : (
               <>
                 <li className="nav-item">
-                  <Link to="/login" className="nav-link" onClick={handleLinkClick}>Login</Link>
+                  <Link to="/login" className="nav-link animated-link" onClick={handleLinkClick}>
+                    Login <span className="hover-bar"></span>
+                  </Link>
                 </li>
                 <li className="nav-item">
-                  <Link to="/register" className="nav-link" onClick={handleLinkClick}>Register</Link>
+                  <Link to="/register" className="nav-link animated-link" onClick={handleLinkClick}>
+                    Register <span className="hover-bar"></span>
+                  </Link>
                 </li>
               </>
             )}
