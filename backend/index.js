@@ -4,6 +4,8 @@ const path = require('path');
 require('dotenv').config();
 const { sequelize } = require('./config/database');
 const logger = require('./utils/logger');
+const { initializeAssociations } = require('./models/associations');
+const bcrypt = require('bcrypt');
 
 // Override console methods to prevent sensitive logging
 const originalConsoleLog = console.log;
@@ -42,11 +44,13 @@ const userRoutes = require('./routes/users');
 const recipeRoutes = require('./routes/recipes');
 const likesRoutes = require('./routes/likes');
 const contactRoutes = require('./routes/contact');
+const commentsRouter = require('./routes/comments');
 
 app.use('/api/contact', contactRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/recipes', recipeRoutes);
 app.use('/api/likes', likesRoutes);
+app.use('/api/comments', commentsRouter);
 
 // Log registered routes
 logger.server("Registered API routes:");
@@ -67,22 +71,67 @@ app.get('*', (req, res) => {
   res.status(404).json({ error: "API route not found" });
 });
 
-// Database Connection
-sequelize
-  .authenticate()
-  .then(() => logger.server('Database connected successfully'))
-  .catch((err) => logger.error('Database connection failed:', err));
+// Initialize model associations
+initializeAssociations();
 
-// Connect to database and initialize tables if they don't exist
-sequelize
-  .sync({ force: false })
-  .then(() => {
-    logger.server('Database tables verified');
+// Database Connection and Sync
+const initializeDatabase = async () => {
+  try {
+    // Connect to database
+    await sequelize.authenticate();
+    console.log('✓ Database connection established successfully');
+
+    // Log registered models
+    console.log('Registered Models:', Object.keys(sequelize.models));
+
+    // Check if Users table exists by trying to count users
+    let tableExists = false;
+    try {
+      await sequelize.models.Users.count();
+      tableExists = true;
+    } catch (error) {
+      // Table doesn't exist, which is fine
+      console.log('Tables do not exist yet, will create them');
+    }
+
+    if (!tableExists) {
+      // Only sync if tables don't exist
+      await sequelize.sync();
+      console.log('✓ Database tables created');
+
+      // Create test users if needed
+      const { User } = require('./models/user');
+      const hashedPassword = await bcrypt.hash('password123', 10);
+      
+      await User.bulkCreate([
+        {
+          username: 'testuser',
+          email: 'test@example.com',
+          password: hashedPassword
+        },
+        {
+          username: 'demo',
+          email: 'demo@example.com',
+          password: hashedPassword
+        }
+      ]);
+      console.log('✓ Test users created');
+    } else {
+      console.log('✓ Database tables already exist, skipping initialization');
+    }
+
+    // Start server
     app.listen(PORT, () => {
-      logger.server(`Server running at http://localhost:${PORT}`);
-      logger.server("Press Ctrl+C to stop the server");
+      console.log(`✓ Server running at http://localhost:${PORT}`);
+      console.log("Press Ctrl+C to stop the server");
     });
-  })
-  .catch((err) => logger.error('Database sync failed:', err));
+  } catch (error) {
+    console.error('❌ Database initialization failed:', error);
+    process.exit(1);
+  }
+};
+
+// Initialize database and start server
+initializeDatabase();
 
 module.exports = app;

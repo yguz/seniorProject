@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
-require('dotenv').config();
+const bcrypt = require('bcrypt');
 
 const router = express.Router();
 
@@ -24,71 +24,162 @@ const transporter = nodemailer.createTransport({
   silent: true // Completely silence all logs
 });
 
+// Debug route to check database state
+router.get('/debug', async (req, res) => {
+  try {
+    const userCount = await User.count();
+    const tables = await User.sequelize.showAllSchemas();
+    res.json({
+      userCount,
+      tables,
+      models: Object.keys(User.sequelize.models),
+      userAttributes: Object.keys(User.rawAttributes)
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Register Route
 router.post('/register', async (req, res) => {
+  console.log('\n=== New Registration Attempt ===');
+  console.log('Request body:', {
+    ...req.body,
+    password: req.body.password ? '[HIDDEN]' : undefined
+  });
+
   try {
-    const { email, password, name, dietaryPreferences } = req.body;
+    // Accept either username or name field
+    const username = req.body.username || req.body.name;
+    const { email, password } = req.body;
 
-    if (!email || !password) {
-      logger.info("Registration attempt missing required fields");
-      return res.status(400).json({ error: "Email and password are required." });
-    }
-
-    const encryptedEmail = encryptEmail(email);
-
-    const existingUser = await User.findOne({ where: { email: encryptedEmail } });
-    if (existingUser) {
-      logger.info("Registration attempt with existing email");
-      return res.status(400).json({ error: 'Email already in use' });
-    }
-
-    const hashedPassword = await hashPassword(password);
-
-    const user = await User.create({
-      name: name || null,
-      email: encryptedEmail,
-      password: hashedPassword,
-      dietaryPreferences: dietaryPreferences || null,
+    // Log validation
+    console.log('Validating fields:', {
+      username: !!username,
+      email: !!email,
+      password: !!password
     });
 
-    logger.server(`New user registered with ID: ${user.id}`);
-    res.status(201).json({ message: 'User registered successfully', userId: user.id });
+    if (!username || !email || !password) {
+      console.log('❌ Validation failed: Missing required fields');
+      return res.status(400).json({
+        error: 'Missing required fields',
+        missing: {
+          username: !username,
+          email: !email,
+          password: !password
+        }
+      });
+    }
+
+    // Check existing user
+    console.log('Checking for existing user with email:', email);
+    const existingUser = await User.findOne({
+      where: { email: email.toLowerCase() }
+    });
+
+    if (existingUser) {
+      console.log('❌ Registration failed: Email already exists');
+      return res.status(400).json({ error: 'Email already registered' });
+    }
+
+    // Hash password
+    console.log('Hashing password...');
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Password hashed successfully');
+
+    // Create user
+    console.log('Creating new user...');
+    const user = await User.create({
+      username: username.trim(),
+      email: email.toLowerCase().trim(),
+      password: hashedPassword
+    });
+
+    console.log('✓ User created successfully:', {
+      id: user.id,
+      username: user.username,
+      email: user.email
+    });
+
+    res.status(201).json({
+      userId: user.id,
+      username: user.username,
+      email: user.email
+    });
+
   } catch (error) {
-    logger.error('Error registering user:', error);
-    res.status(500).json({ error: 'Failed to register user', details: error.message });
+    console.error('❌ Registration error:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({
+      error: 'Failed to register user',
+      details: error.message
+    });
   }
 });
 
 // Login Route
 router.post('/login', async (req, res) => {
   try {
+    console.log('Login attempt received:', {
+      ...req.body,
+      password: req.body.password ? '[HIDDEN]' : undefined
+    });
+
     const { email, password } = req.body;
 
+    // Validate required fields
     if (!email || !password) {
-      logger.info("Login attempt missing required fields");
-      return res.status(400).json({ error: "Missing required fields" });
+      console.log('Missing login fields:', {
+        email: !!email,
+        password: !!password
+      });
+      return res.status(400).json({
+        error: 'Missing required fields',
+        missing: {
+          email: !email,
+          password: !password
+        }
+      });
     }
 
-    const encryptedEmail = encryptEmail(email);
+    // Find user
+    const user = await User.findOne({
+      where: { email: email.toLowerCase().trim() }
+    });
 
-    const user = await User.findOne({ where: { email: encryptedEmail } });
     if (!user) {
-      logger.info("Login attempt with non-existent email");
-      return res.status(400).json({ error: "Invalid email or password" });
+      console.log('User not found:', email);
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const isValid = await comparePassword(password, user.password);
+    // Compare password
+    const validPassword = await bcrypt.compare(password, user.password);
 
-    if (!isValid) {
-      logger.info("Login attempt with invalid password");
-      return res.status(400).json({ error: "Invalid email or password" });
+    if (!validPassword) {
+      console.log('Invalid password for user:', email);
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    logger.server(`User logged in with ID: ${user.id}`);
-    res.status(200).json({ message: "Login successful", userId: user.id, name: user.name });
+    console.log('User logged in successfully:', {
+      id: user.id,
+      username: user.username,
+      email: user.email
+    });
+
+    // Return user data (excluding password)
+    res.json({
+      userId: user.id,
+      username: user.username,
+      email: user.email
+    });
+
   } catch (error) {
-    logger.error('Error logging in:', error);
-    res.status(500).json({ error: 'Failed to login', details: error.message });
+    console.error('Login error:', error);
+    res.status(500).json({
+      error: 'Failed to log in',
+      details: error.message
+    });
   }
 });
 
@@ -199,7 +290,7 @@ router.post('/reset-password/:token', async (req, res) => {
     }
     
     // Hash the new password
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await bcrypt.hash(password, 10);
     
     // Update user's password and clear reset token fields
     user.password = hashedPassword;
@@ -212,6 +303,60 @@ router.post('/reset-password/:token', async (req, res) => {
   } catch (error) {
     logger.error('Error resetting password:', error);
     res.status(500).json({ error: 'Failed to reset password' });
+  }
+});
+
+// Get user by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const user = await User.findByPk(req.params.id, {
+      attributes: ['id', 'username', 'email', 'dietaryPreferences'] // Exclude password
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    logger.error('Error fetching user:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch user',
+      details: error.message
+    });
+  }
+});
+
+// Update user
+router.put('/:id', async (req, res) => {
+  try {
+    const { username, email, dietaryPreferences } = req.body;
+    const user = await User.findByPk(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Update user fields
+    if (username) user.username = username;
+    if (email) user.email = email;
+    if (dietaryPreferences) user.dietaryPreferences = dietaryPreferences;
+
+    await user.save();
+
+    res.json({
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      dietaryPreferences: user.dietaryPreferences
+    });
+
+  } catch (error) {
+    logger.error('Error updating user:', error);
+    res.status(500).json({ 
+      error: 'Failed to update user',
+      details: error.message
+    });
   }
 });
 

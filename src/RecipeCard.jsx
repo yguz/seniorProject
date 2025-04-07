@@ -4,9 +4,10 @@ import axios from 'axios';
 import { Link, useLocation } from 'react-router-dom';
 import './assets/recipeCard.css';
 import { UserContext } from "./context/UserContext.jsx";
+import CommentModal from './components/CommentModal';
 
 const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes }) => {
-  const [showCommentBox, setShowCommentBox] = useState(false);
+  const [showCommentModal, setShowCommentModal] = useState(false);
   const [price, setPrice] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [likeStatus, setLikeStatus] = useState('idle'); // 'idle', 'loading', 'success', 'error'
@@ -37,8 +38,13 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
     }
   }, [isDashboard, likedRecipes, recipe.id]);
 
-  const toggleCommentBox = () => {
-    setShowCommentBox(!showCommentBox);
+  const handleOpenComments = () => {
+    if (!userId) {
+      setErrorMessage('Please log in to view and post comments');
+      return;
+    }
+    setShowCommentModal(true);
+    setErrorMessage('');
   };
 
   // Set the price when the recipe is first loaded
@@ -117,50 +123,53 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
   }
 
   return (
-    <div className="recipe-box">
-      <div className="front">
-        <img src={recipe.image} alt={recipe.title} />
-        <h3>{recipe.title}</h3>
-        <p>{displayedPrice}</p> {/* Use the memoized displayed price */}
-      </div>
-      <div className="back">
-        {errorMessage && <div className="error-message">{errorMessage}</div>}
-        <div className="like-btn" onClick={toggleLike}>
-          {isLiked ? (
-            <FaHeart color="red" size={24} />
-          ) : (
-            <FaRegHeart color="grey" size={24} />
-          )}
-          {likeStatus === 'loading' && <span className="loading-indicator"> ...</span>}
-        </div>
-        <div>
+    <>
+      <div className="recipe-box">
+        <div className="front">
+          <img src={recipe.image} alt={recipe.title} />
           <h3>{recipe.title}</h3>
+          <p>{displayedPrice}</p> {/* Use the memoized displayed price */}
         </div>
-        <p><b>Ingredients:</b></p>
-        <ul>
-          {recipe.ingredients && recipe.ingredients.length > 0 ? (
-            recipe.ingredients.map((ingredient, index) => (
-              <li key={index}>{ingredient.original || 'Unknown Ingredient'}</li>
-            ))
-          ) : (
-            <li>No ingredients available.</li>
-          )}
-        </ul>
-        
-        {/* Link to see full recipe */}
-        <Link to={`/recipe/${recipe.id}?price=${price}`} className="full-recipe-link">See full recipe for instructions</Link>
-
-        <button className="comment-btn" onClick={toggleCommentBox}>
-          Add Comment
-        </button>
-        {showCommentBox && (
-          <div className="comment-box active">
-            <textarea placeholder="Enter your comment here..."></textarea>
-            <button className="submit-comment">Submit</button>
+        <div className="back">
+          {errorMessage && <div className="error-message">{errorMessage}</div>}
+          <div className="like-btn" onClick={toggleLike}>
+            {isLiked ? (
+              <FaHeart color="red" size={24} />
+            ) : (
+              <FaRegHeart color="grey" size={24} />
+            )}
+            {likeStatus === 'loading' && <span className="loading-indicator"> ...</span>}
           </div>
-        )}
+          <div>
+            <h3>{recipe.title}</h3>
+          </div>
+          <p><b>Ingredients:</b></p>
+          <ul>
+            {recipe.ingredients && recipe.ingredients.length > 0 ? (
+              recipe.ingredients.map((ingredient, index) => (
+                <li key={index}>{ingredient.original || 'Unknown Ingredient'}</li>
+              ))
+            ) : (
+              <li>No ingredients available.</li>
+            )}
+          </ul>
+          
+          {/* Link to see full recipe */}
+          <Link to={`/recipe/${recipe.id}?price=${price}`} className="full-recipe-link">See full recipe for instructions</Link>
+
+          <button className="comment-btn" onClick={handleOpenComments}>
+            View Comments
+          </button>
+        </div>
       </div>
-    </div>
+
+      <CommentModal
+        isOpen={showCommentModal}
+        onClose={() => setShowCommentModal(false)}
+        recipeId={recipe.id}
+        recipeTitle={recipe.title}
+      />
+    </>
   );
 };
 

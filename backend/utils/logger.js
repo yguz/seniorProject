@@ -1,7 +1,7 @@
 // Logger utility to control logging throughout the application
 const logger = {
-    // Set to true to enable non-sensitive logs
-    enableLogs: true,
+    // Set enableLogs to false to suppress non-essential logs
+    enableLogs: false,
     
     // For general information
     info: function(message) {
