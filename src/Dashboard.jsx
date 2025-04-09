@@ -15,11 +15,26 @@ const Dashboard = () => {
     if (!user || !user.userId) return;
     
     try {
-      await axios.delete(`http://localhost:3000/api/likes/${recipeId}/${user.userId}`);
-      // Update the local state to remove the unliked recipe
-      setLikedRecipes(prevRecipes => prevRecipes.filter(recipe => recipe.recipeId !== recipeId));
+      // Convert recipeId to number to ensure type consistency
+      const numericRecipeId = Number(recipeId);
+      
+      // Update local state BEFORE making the API call for immediate UI feedback
+      setLikedRecipes(prevRecipes => 
+        prevRecipes.filter(recipe => Number(recipe.recipeId) !== numericRecipeId)
+      );
+
+      // Make the API call
+      await axios.delete(`http://localhost:3000/api/likes/${numericRecipeId}/${user.userId}`);
+      
     } catch (error) {
       console.error("Error unliking recipe:", error);
+      // If the API call fails, revert the state change
+      if (error.response?.status === 404) {
+        // If it's a 404, the recipe was already unliked, so keep the state as is
+        return;
+      }
+      // Otherwise, refresh the likes to get the correct state
+      refreshLikedRecipes();
       setErrorMessage(error.response?.data?.error || "Failed to unlike recipe");
     }
   };
@@ -70,8 +85,8 @@ const Dashboard = () => {
         {likedRecipes.length > 0 ? (
           likedRecipes.map((recipe) => (
             <RecipeCard 
-              key={`${recipe.recipeId}-${recipe.id}`} 
-              recipe={{...recipe, id: recipe.recipeId}} 
+              key={`${recipe.recipeId}`} 
+              recipe={recipe} 
               isDashboard={true}
               onUnlike={handleUnlike}
               refreshLikedRecipes={refreshLikedRecipes}

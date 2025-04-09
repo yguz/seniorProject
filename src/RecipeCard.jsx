@@ -33,10 +33,10 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
       setIsLiked(true);
     } else {
       // Check if recipe exists in likedRecipes from context
-      const alreadyLiked = likedRecipes.some(like => like.recipeId === recipe.id);
+      const alreadyLiked = likedRecipes.some(like => like.recipeId === (recipe.recipeId || recipe.id));
       setIsLiked(alreadyLiked);
     }
-  }, [isDashboard, likedRecipes, recipe.id]);
+  }, [isDashboard, likedRecipes, recipe]);
 
   const handleOpenComments = () => {
     if (!userId) {
@@ -71,11 +71,14 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
     setErrorMessage('');
 
     try {
+      // Get the recipe ID and ensure it's a number
+      const recipeId = Number(recipe.recipeId || recipe.id);
+
       if (!isLiked) {
         // Like the recipe
         const payload = {
-          recipeId: recipe.id,
-          userId: userId,
+          recipeId,
+          userId: Number(userId),
           image: recipe.image,
           title: recipe.title,
           price: price,
@@ -86,7 +89,6 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
         const response = await axios.post('http://localhost:3000/api/likes', payload);
         
         if (response.status === 201) {
-          // Update global state only if we're not already in the dashboard
           if (!isDashboard) {
             setLikedRecipes(prev => [...prev, payload]);
           }
@@ -96,18 +98,20 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
         }
       } else {
         // Unlike the recipe
-        const response = await axios.delete(`http://localhost:3000/api/likes/${recipe.id}/${userId}`);
-        
-        if (response.status === 200) {
-          if (isDashboard && onUnlike) {
-            // If we're in the dashboard, call the parent's onUnlike function
-            onUnlike(recipe.id);
-          } else {
-            // Otherwise just update the global state
-            setLikedRecipes(prev => prev.filter(like => like.recipeId !== recipe.id));
-          }
+        if (isDashboard) {
+          // In dashboard, trigger parent's onUnlike first for immediate UI update
+          onUnlike(recipeId);
           setIsLiked(false);
           setLikeStatus('success');
+        } else {
+          // For search page, make API call first
+          const response = await axios.delete(`http://localhost:3000/api/likes/${recipeId}/${userId}`);
+          
+          if (response.status === 200) {
+            setLikedRecipes(prev => prev.filter(like => Number(like.recipeId) !== recipeId));
+            setIsLiked(false);
+            setLikeStatus('success');
+          }
         }
       }
     } catch (error) {

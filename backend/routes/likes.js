@@ -74,7 +74,13 @@ router.delete('/:recipeId/:userId', async (req, res) => {
     
     await existingLike.destroy();
     logger.server(`User ${userId} unliked recipe ${recipeId}`);
-    res.status(200).json({ message: "Recipe unliked successfully" });
+    res.status(200).json({ 
+      message: "Recipe unliked successfully",
+      unlikedRecipe: {
+        userId: parseInt(userId),
+        recipeId: parseInt(recipeId)
+      }
+    });
   } catch (error) {
     logger.error("Error unliking recipe:", error);
     res.status(500).json({ error: error.message || "Internal server error" });
