@@ -4,69 +4,95 @@ import './assets/searchResults.css';
 
 const MealResults = ({ mealType }) => {
   const [recipes, setRecipes] = useState([]);
+  const [filteredRecipes, setFilteredRecipes] = useState([]);
+  const [priceSort, setPriceSort] = useState('lowToHigh');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isFirstLoad, setIsFirstLoad] = useState(true); // Track first load
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
-  // Ref to track whether the fetch for this mealType has been triggered
   const fetchTriggered = useRef(false);
 
   useEffect(() => {
-    // Reset the fetch trigger every time mealType changes
-    fetchTriggered.current = false;  // Allow fetch to run again when mealType changes
-  }, [mealType]);  // This will run every time mealType changes
+    fetchTriggered.current = false;
+  }, [mealType]);
 
   useEffect(() => {
     if (isFirstLoad) {
-      setIsFirstLoad(false);  // Set first load to false after the first fetch
-      return;  // Skip the first load
+      setIsFirstLoad(false);
+      return;
     }
 
-    // If fetch has already been triggered for this mealType, do not call the API again
     if (fetchTriggered.current) {
       return;
     }
 
     const fetchRecipes = async () => {
-      setLoading(true);  // Set loading state before making the request
+      setLoading(true);
       try {
-        // Call the backend API and pass only the mealType (lunch, breakfast, or dinner)
         const response = await fetch(`http://localhost:3000/api/recipes/search/${mealType}`);
         if (!response.ok) {
           throw new Error(`Server Error: ${response.status}`);
         }
         const data = await response.json();
-        setRecipes(data);  // Update state with recipes
-        setError(null);     // Clear any previous error
+
+        // Sort low to high by default
+        const sorted = data.sort((a, b) => (a.price || 0) - (b.price || 0));
+        setRecipes(sorted);
+        setFilteredRecipes(sorted);
+        setError(null);
       } catch (err) {
-        setError(err.message);  // Set the error state in case of failure
-        setRecipes([]);         // Clear the recipes array on error
+        setError(err.message);
+        setRecipes([]);
+        setFilteredRecipes([]);
       } finally {
-        setLoading(false);      // Set loading state to false after the request is complete
-        fetchTriggered.current = true; // Mark that fetch has been triggered
+        setLoading(false);
+        fetchTriggered.current = true;
       }
     };
 
     if (mealType) {
-      fetchRecipes();  // Trigger the API call when mealType is set
+      fetchRecipes();
     }
-  }, [mealType, isFirstLoad]);  // Re-run when mealType changes, and skip the first load
+  }, [mealType, isFirstLoad]);
+
+  const sortRecipesByPrice = (sortOrder) => {
+    let sorted = [...recipes];
+    if (sortOrder === 'lowToHigh') {
+      sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (sortOrder === 'highToLow') {
+      sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
+    }
+    setFilteredRecipes(sorted);
+  };
+
+  const handlePriceSortChange = (e) => {
+    const selectedSortOrder = e.target.value;
+    setPriceSort(selectedSortOrder);
+    sortRecipesByPrice(selectedSortOrder);
+  };
 
   return (
     <div className="results-container">
       <h1>Recipes for {mealType.charAt(0).toUpperCase() + mealType.slice(1)}</h1>
 
-      {error && <p className="error">Error: {error}</p>}
+      <div className="sort-widget">
+        <label htmlFor="priceSort">Sort by:</label>
+        <select id="priceSort" value={priceSort} onChange={handlePriceSortChange}>
+          <option value="lowToHigh">Low to High</option>
+          <option value="highToLow">High to Low</option>
+        </select>
+      </div>
 
-      {loading && <div className="spinner"></div>} {/* Show the spinner instead of text */}
+      {error && <p className="error">Error: {error}</p>}
+      {loading && <div className="spinner"></div>}
 
       <div className="container">
-        {recipes.length > 0 ? (
-          recipes.map((recipe) => (
+        {filteredRecipes.length > 0 ? (
+          filteredRecipes.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))
         ) : (
-          !loading && <p>No recipes found.</p>  // Display message if no recipes and not loading
+          !loading && <p>No recipes found.</p>
         )}
       </div>
     </div>

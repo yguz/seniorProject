@@ -28,8 +28,10 @@ const SearchResults = () => {
         }
         const data = await response.json();
         console.log('Fetched recipes:', data.recipes);
-        setRecipes(data.recipes);
-        setFilteredRecipes(data.recipes);
+        // sort low to high by default
+        const sortedRecipes = data.recipes.sort((a, b) => (a.price || 0) - (b.price || 0));
+        setRecipes(sortedRecipes);
+        setFilteredRecipes(sortedRecipes);
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -80,20 +82,14 @@ const SearchResults = () => {
         <button className="search-btn-results" onClick={() => navigate(`/results?search=${searchQuery}`)}>Search</button>
       </div>
 
-      <div className="mb-2">
-        <label htmlFor="priceSort" className="block text-sm font-medium text-gray-700 mb-1">
-          Sort by Price:
-        </label>
-        <select
-          id="priceSort"
-          value={priceSort}
-          onChange={handlePriceSortChange}
-          className="mt-1 block w-full py-2 px-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none"
-        >
-          <option value="lowToHigh">Price: Low to High</option>
-          <option value="highToLow">Price: High to Low</option>
+      <div className="sort-widget">
+        <label htmlFor="priceSort">Sort by:</label>
+        <select id="priceSort" value={priceSort} onChange={handlePriceSortChange}>
+          <option value="lowToHigh">Low to High</option>
+          <option value="highToLow">High to Low</option>
         </select>
       </div>
+
 
       {error && <p className="error">Error: {error}</p>}
 
