@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import axios from 'axios';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './assets/recipeCard.css';
 import { UserContext } from "./context/UserContext.jsx";
 import CommentModal from './components/CommentModal';
@@ -19,6 +19,7 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
 
   // Use location to get query params
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Use memoization to store price and avoid re-calculating it unnecessarily
   const displayedPrice = useMemo(() => {
@@ -128,6 +129,16 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
     e.stopPropagation(); // Prevent the click from propagating to the card's click handler
   };
 
+  const handleLinkClick = (e) => {
+    e.preventDefault(); // Prevent the default anchor link behavior
+    navigate(`/recipe/${recipe.id}?price=${price}`, {
+      state: {
+        recipes: [recipe], // passing just the current recipe for this link
+        query: location.search,
+      },
+    });
+  };
+
   return (
     <>
       <div className="recipe-box" onClick={() => console.log('Card clicked!')}>
@@ -161,9 +172,13 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
           </ul>
           
           {/* Link to see full recipe */}
-          <Link to={`/recipe/${recipe.id}?price=${price}`} className="full-recipe-link" onClick={handleClickPrevent}>
+          <a
+            href="#"
+            className="full-recipe-link"
+            onClick={handleLinkClick}
+          >
             See full recipe for instructions
-          </Link>
+          </a>
 
           <button className="comment-btn" onClick={(e) => { handleOpenComments(); handleClickPrevent(e); }}>
             View Comments
