@@ -131,7 +131,7 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
 
   const handleLinkClick = (e) => {
     e.preventDefault(); // Prevent the default anchor link behavior
-    navigate(`/recipe/${recipe.id}?price=${price}`, {
+    navigate(`/recipe/${recipe.recipeId}?price=${price}`, {
       state: {
         recipes: [recipe], // passing just the current recipe for this link
         query: location.search,
