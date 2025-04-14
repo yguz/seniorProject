@@ -101,17 +101,14 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
         if (isDashboard) {
           // In dashboard, trigger parent's onUnlike first for immediate UI update
           onUnlike(recipeId);
+        }
+
+        const response = await axios.delete(`http://localhost:3000/api/likes/${recipeId}/${userId}`);
+          
+        if (response.status === 200) {
+          setLikedRecipes(prev => prev.filter(like => Number(like.recipeId) !== recipeId));
           setIsLiked(false);
           setLikeStatus('success');
-        } else {
-          // For search page, make API call first
-          const response = await axios.delete(`http://localhost:3000/api/likes/${recipeId}/${userId}`);
-          
-          if (response.status === 200) {
-            setLikedRecipes(prev => prev.filter(like => Number(like.recipeId) !== recipeId));
-            setIsLiked(false);
-            setLikeStatus('success');
-          }
         }
       }
     } catch (error) {
