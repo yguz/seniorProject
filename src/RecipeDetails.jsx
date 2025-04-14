@@ -4,6 +4,7 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './assets/recipeDetails.css';
+import DOMPurify from 'dompurify';
 
 const RecipeDetails = () => {
   const { id } = useParams();
@@ -48,23 +49,23 @@ const RecipeDetails = () => {
 
   return (
     <div className="recipe-details">
-     {previousRecipes && fromQuery && (
-  <div className="back-button-wrapper">
-    <button
-      className="back-btn"
-      onClick={() =>
-        navigate('/results?search=' + fromQuery, {
-          state: {
-            recipes: previousRecipes,
-            query: fromQuery,
-          },
-        })
-      }
-    >
-      ← Back
-    </button>
-  </div>
-)}
+      {previousRecipes && fromQuery && (
+        <div className="back-button-wrapper">
+          <button
+            className="back-btn"
+            onClick={() =>
+              navigate('/results?search=' + fromQuery, {
+                state: {
+                  recipes: previousRecipes,
+                  query: fromQuery,
+                },
+              })
+            }
+          >
+            ← Back
+          </button>
+        </div>
+      )}
 
       <div className="image-container">
         <img src={recipe.image} alt={recipe.title} />
@@ -92,7 +93,9 @@ const RecipeDetails = () => {
         {recipe.instructions ? (
           <div className="instructions">
             <h3>Instructions:</h3>
-            <p>{recipe.instructions}</p>
+            <div 
+    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(recipe.instructions) }} 
+  />
           </div>
         ) : (
           <p>No instructions available.</p>

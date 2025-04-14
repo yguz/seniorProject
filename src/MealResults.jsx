@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import RecipeCard from './RecipeCard';
 import './assets/searchResults.css';
 
@@ -8,58 +9,49 @@ const MealResults = ({ mealType }) => {
   const [priceSort, setPriceSort] = useState('lowToHigh');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
-
   const fetchTriggered = useRef(false);
 
+  const navigate = useNavigate();
+
+  // Reset fetch flag when mealType changes
   useEffect(() => {
     fetchTriggered.current = false;
   }, [mealType]);
 
+  // Fetch data
   useEffect(() => {
-    if (isFirstLoad) {
-      setIsFirstLoad(false);
-      return;
-    }
-
-    if (fetchTriggered.current) {
-      return;
-    }
+    if (fetchTriggered.current || !mealType) return;
 
     const fetchRecipes = async () => {
       setLoading(true);
       try {
         const response = await fetch(`http://localhost:3000/api/recipes/search/${mealType}`);
-        if (!response.ok) {
-          throw new Error(`Server Error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Server Error: ${response.status}`);
         const data = await response.json();
 
-        // Sort low to high by default
         const sorted = data.sort((a, b) => (a.price || 0) - (b.price || 0));
         setRecipes(sorted);
         setFilteredRecipes(sorted);
         setError(null);
+        fetchTriggered.current = true;
       } catch (err) {
         setError(err.message);
         setRecipes([]);
         setFilteredRecipes([]);
       } finally {
         setLoading(false);
-        fetchTriggered.current = true;
       }
     };
 
-    if (mealType) {
-      fetchRecipes();
-    }
-  }, [mealType, isFirstLoad]);
+    fetchRecipes();
+  }, [mealType]);
 
+  // Sorting logic
   const sortRecipesByPrice = (sortOrder) => {
-    let sorted = [...recipes];
+    const sorted = [...recipes];
     if (sortOrder === 'lowToHigh') {
       sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
-    } else if (sortOrder === 'highToLow') {
+    } else {
       sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
     }
     setFilteredRecipes(sorted);
@@ -89,7 +81,20 @@ const MealResults = ({ mealType }) => {
       <div className="container">
         {filteredRecipes.length > 0 ? (
           filteredRecipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+            <div
+              key={recipe.id}
+              onClick={() =>
+                navigate(`/recipe/${recipe.id}?price=${recipe.price}&mealType=${mealType}`, {
+                  state: {
+                    recipes: filteredRecipes,
+                    query: mealType,
+                  },
+                })
+              }
+              style={{ cursor: 'pointer' }}
+            >
+              <RecipeCard recipe={recipe} />
+            </div>
           ))
         ) : (
           !loading && <p>No recipes found.</p>

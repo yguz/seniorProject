@@ -130,14 +130,23 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
   };
 
   const handleLinkClick = (e) => {
-    e.preventDefault(); // Prevent the default anchor link behavior
-    navigate(`/recipe/${recipe.recipeId}?price=${price}`, {
+    e.preventDefault(); // Prevent default anchor behavior
+  
+    const recipeId = isDashboard ? recipe.recipeId : recipe.id;
+  
+    if (!recipeId) {
+      console.warn("Missing recipe ID!");
+      return;
+    }
+  
+    navigate(`/recipe/${recipeId}?price=${price}&search=${location.state?.query || ''}`, {
       state: {
-        recipes: [recipe], // passing just the current recipe for this link
-        query: location.search,
+        recipes: [recipe],
+        query: location.state?.query || '',
       },
     });
   };
+  
 
   return (
     <>
@@ -173,7 +182,7 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
           
           {/* Link to see full recipe */}
           <a
-            href="#"
+            href="javascript:void(0)"
             className="full-recipe-link"
             onClick={handleLinkClick}
           >
