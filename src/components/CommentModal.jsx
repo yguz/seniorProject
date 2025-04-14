@@ -92,9 +92,14 @@ const CommentModal = ({ isOpen, onClose, recipeId, recipeTitle }) => {
 
   if (!isOpen) return null;
 
+  // Stop propagation of click events inside modal
+  const handleModalClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={handleModalClick}>
         <div className="modal-header">
           <h2>Comments for {recipeTitle}</h2>
           <button className="close-button" onClick={onClose}>&times;</button>
@@ -147,4 +152,4 @@ const CommentModal = ({ isOpen, onClose, recipeId, recipeTitle }) => {
   );
 };
 
-export default CommentModal; 
+export default CommentModal;

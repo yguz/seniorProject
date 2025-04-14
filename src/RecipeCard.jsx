@@ -123,9 +123,14 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
     return null; // Prevent rendering the recipe card if price is invalid or not available
   }
 
+  // Prevent click from propagating to the card click event on these elements
+  const handleClickPrevent = (e) => {
+    e.stopPropagation(); // Prevent the click from propagating to the card's click handler
+  };
+
   return (
     <>
-      <div className="recipe-box">
+      <div className="recipe-box" onClick={() => console.log('Card clicked!')}>
         <div className="front">
           <img src={recipe.image} alt={recipe.title} />
           <h3>{recipe.title}</h3>
@@ -133,7 +138,7 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
         </div>
         <div className="back">
           {errorMessage && <div className="error-message">{errorMessage}</div>}
-          <div className="like-btn" onClick={toggleLike}>
+          <div className="like-btn" onClick={(e) => { toggleLike(); handleClickPrevent(e); }}>
             {isLiked ? (
               <FaHeart color="red" size={24} />
             ) : (
@@ -156,19 +161,23 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
           </ul>
           
           {/* Link to see full recipe */}
-          <Link to={`/recipe/${recipe.id}?price=${price}`} className="full-recipe-link">See full recipe for instructions</Link>
+          <Link to={`/recipe/${recipe.id}?price=${price}`} className="full-recipe-link" onClick={handleClickPrevent}>
+            See full recipe for instructions
+          </Link>
 
-          <button className="comment-btn" onClick={handleOpenComments}>
+          <button className="comment-btn" onClick={(e) => { handleOpenComments(); handleClickPrevent(e); }}>
             View Comments
           </button>
         </div>
       </div>
 
+      {/* Comment Modal: Prevent propagation */}
       <CommentModal
         isOpen={showCommentModal}
         onClose={() => setShowCommentModal(false)}
         recipeId={recipe.id}
         recipeTitle={recipe.title}
+        onClick={(e) => e.stopPropagation()}  // Prevent propagation of click events inside the modal
       />
     </>
   );
