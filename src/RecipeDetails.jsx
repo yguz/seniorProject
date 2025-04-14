@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'; // Bootstrap JS (bundle with Popper)
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './assets/recipeDetails.css';
 
 const RecipeDetails = () => {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
+
   const [recipe, setRecipe] = useState(null);
   const [error, setError] = useState('');
+
   const price = new URLSearchParams(location.search).get('price');
+  const searchQuery = new URLSearchParams(location.search).get('search');
+  const previousRecipes = location.state?.recipes;
+  const fromQuery = location.state?.query;
 
   useEffect(() => {
     const fetchRecipeDetails = async () => {
@@ -28,22 +34,38 @@ const RecipeDetails = () => {
     fetchRecipeDetails();
   }, [id, price]);
 
-  // Initialize Bootstrap tooltips once the component mounts
   useEffect(() => {
-    // Ensure tooltips are initialized once the recipe data is available
     if (recipe) {
       const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
       tooltipTriggerList.forEach((tooltipTriggerEl) => {
-        new window.bootstrap.Tooltip(tooltipTriggerEl); // Initialize tooltip
+        new window.bootstrap.Tooltip(tooltipTriggerEl);
       });
     }
-  }, [recipe]); // Re-run when recipe data is fetched
+  }, [recipe]);
 
   if (error) return <div className="error">{error}</div>;
   if (!recipe) return <div className="loading">Loading...</div>;
 
   return (
     <div className="recipe-details">
+     {previousRecipes && fromQuery && (
+  <div className="back-button-wrapper">
+    <button
+      className="back-btn"
+      onClick={() =>
+        navigate('/results?search=' + fromQuery, {
+          state: {
+            recipes: previousRecipes,
+            query: fromQuery,
+          },
+        })
+      }
+    >
+      ← Back
+    </button>
+  </div>
+)}
+
       <div className="image-container">
         <img src={recipe.image} alt={recipe.title} />
       </div>
@@ -51,20 +73,12 @@ const RecipeDetails = () => {
       <div className="text-container">
         <h1>{recipe.title}</h1>
 
-        {/* Conditionally render Servings */}
         {recipe.servings && <p><strong>Servings:</strong> {recipe.servings}</p>}
-
-        {/* Conditionally render Preparation Time */}
         {recipe.preparationMinutes && <p><strong>Preparation time:</strong> {recipe.preparationMinutes} minutes</p>}
-
-        {/* Conditionally render Cooking Time */}
         {recipe.cookingMinutes && <p><strong>Cooking time:</strong> {recipe.cookingMinutes} minutes</p>}
-
-        {/* Conditionally render Price */}
         {recipe.price && <p className="price"><strong>Price per serving:</strong> ${recipe.price}</p>}
 
-        {/* Conditionally render Ingredients */}
-        {recipe.extendedIngredients && recipe.extendedIngredients.length > 0 && (
+        {recipe.extendedIngredients?.length > 0 && (
           <>
             <h3>Ingredients:</h3>
             <ul>
@@ -75,7 +89,6 @@ const RecipeDetails = () => {
           </>
         )}
 
-        {/* Conditionally render Instructions */}
         {recipe.instructions ? (
           <div className="instructions">
             <h3>Instructions:</h3>
