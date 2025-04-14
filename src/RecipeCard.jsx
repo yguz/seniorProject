@@ -190,7 +190,7 @@ const RecipeCard = ({ recipe, isDashboard = false, onUnlike, refreshLikedRecipes
       <CommentModal
         isOpen={showCommentModal}
         onClose={() => setShowCommentModal(false)}
-        recipeId={recipe.id}
+        recipeId={isDashboard ? recipe.recipeId : recipe.id}
         recipeTitle={recipe.title}
         onClick={(e) => e.stopPropagation()}  // Prevent propagation of click events inside the modal
       />
